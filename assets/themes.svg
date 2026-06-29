@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400" role="img" aria-label="The seven claude-bionify palettes">
+  <title>claude-bionify themes</title>
+  <g transform="translate(0,0)">
+    <clipPath id="clip-nord"><rect width="392" height="88" rx="14"/></clipPath>
+    <rect x="0.5" y="0.5" width="391" height="87" rx="14"
+          fill="#2E3440" stroke="#3B4252" stroke-width="1"/>
+    <g clip-path="url(#clip-nord)">
+      <text x="22" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" letter-spacing="0.3" fill="#88C0D0">Nord</text>
+      <rect x="22" y="56" width="34" height="16" rx="4" fill="#88C0D0" stroke="#000" stroke-opacity="0.18"/><rect x="64" y="56" width="34" height="16" rx="4" fill="#D8DEE9" stroke="#000" stroke-opacity="0.18"/><rect x="106" y="56" width="34" height="16" rx="4" fill="#A3BE8C" stroke="#000" stroke-opacity="0.18"/><rect x="148" y="56" width="34" height="16" rx="4" fill="#EBCB8B" stroke="#000" stroke-opacity="0.18"/><rect x="190" y="56" width="34" height="16" rx="4" fill="#BF616A" stroke="#000" stroke-opacity="0.18"/><rect x="232" y="56" width="34" height="16" rx="4" fill="#4C566A" stroke="#000" stroke-opacity="0.18"/>
+    </g>
+  </g>
+  <g transform="translate(408,0)">
+    <clipPath id="clip-dracula"><rect width="392" height="88" rx="14"/></clipPath>
+    <rect x="0.5" y="0.5" width="391" height="87" rx="14"
+          fill="#282A36" stroke="#44475A" stroke-width="1"/>
+    <g clip-path="url(#clip-dracula)">
+      <text x="22" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" letter-spacing="0.3" fill="#BD93F9">Dracula</text>
+      <rect x="22" y="56" width="34" height="16" rx="4" fill="#BD93F9" stroke="#000" stroke-opacity="0.18"/><rect x="64" y="56" width="34" height="16" rx="4" fill="#F8F8F2" stroke="#000" stroke-opacity="0.18"/><rect x="106" y="56" width="34" height="16" rx="4" fill="#50FA7B" stroke="#000" stroke-opacity="0.18"/><rect x="148" y="56" width="34" height="16" rx="4" fill="#F1FA8C" stroke="#000" stroke-opacity="0.18"/><rect x="190" y="56" width="34" height="16" rx="4" fill="#FF5555" stroke="#000" stroke-opacity="0.18"/><rect x="232" y="56" width="34" height="16" rx="4" fill="#6272A4" stroke="#000" stroke-opacity="0.18"/>
+    </g>
+  </g>
+  <g transform="translate(0,104)">
+    <clipPath id="clip-gruvbox"><rect width="392" height="88" rx="14"/></clipPath>
+    <rect x="0.5" y="0.5" width="391" height="87" rx="14"
+          fill="#282828" stroke="#3C3836" stroke-width="1"/>
+    <g clip-path="url(#clip-gruvbox)">
+      <text x="22" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" letter-spacing="0.3" fill="#FABD2F">Gruvbox</text>
+      <rect x="22" y="56" width="34" height="16" rx="4" fill="#FABD2F" stroke="#000" stroke-opacity="0.18"/><rect x="64" y="56" width="34" height="16" rx="4" fill="#EBDBB2" stroke="#000" stroke-opacity="0.18"/><rect x="106" y="56" width="34" height="16" rx="4" fill="#B8BB26" stroke="#000" stroke-opacity="0.18"/><rect x="148" y="56" width="34" height="16" rx="4" fill="#FE8019" stroke="#000" stroke-opacity="0.18"/><rect x="190" y="56" width="34" height="16" rx="4" fill="#FB4934" stroke="#000" stroke-opacity="0.18"/><rect x="232" y="56" width="34" height="16" rx="4" fill="#928374" stroke="#000" stroke-opacity="0.18"/>
+    </g>
+  </g>
+  <g transform="translate(408,104)">
+    <clipPath id="clip-solarized-dark"><rect width="392" height="88" rx="14"/></clipPath>
+    <rect x="0.5" y="0.5" width="391" height="87" rx="14"
+          fill="#002B36" stroke="#073642" stroke-width="1"/>
+    <g clip-path="url(#clip-solarized-dark)">
+      <text x="22" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" letter-spacing="0.3" fill="#268BD2">Solarized Dark</text>
+      <rect x="22" y="56" width="34" height="16" rx="4" fill="#268BD2" stroke="#000" stroke-opacity="0.18"/><rect x="64" y="56" width="34" height="16" rx="4" fill="#839496" stroke="#000" stroke-opacity="0.18"/><rect x="106" y="56" width="34" height="16" rx="4" fill="#859900" stroke="#000" stroke-opacity="0.18"/><rect x="148" y="56" width="34" height="16" rx="4" fill="#CB4B16" stroke="#000" stroke-opacity="0.18"/><rect x="190" y="56" width="34" height="16" rx="4" fill="#DC322F" stroke="#000" stroke-opacity="0.18"/><rect x="232" y="56" width="34" height="16" rx="4" fill="#586E75" stroke="#000" stroke-opacity="0.18"/>
+    </g>
+  </g>
+  <g transform="translate(0,208)">
+    <clipPath id="clip-solarized-light"><rect width="392" height="88" rx="14"/></clipPath>
+    <rect x="0.5" y="0.5" width="391" height="87" rx="14"
+          fill="#FDF6E3" stroke="#EEE8D5" stroke-width="1"/>
+    <g clip-path="url(#clip-solarized-light)">
+      <text x="22" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" letter-spacing="0.3" fill="#268BD2">Solarized Light</text>
+      <rect x="22" y="56" width="34" height="16" rx="4" fill="#268BD2" stroke="#000" stroke-opacity="0.18"/><rect x="64" y="56" width="34" height="16" rx="4" fill="#657B83" stroke="#000" stroke-opacity="0.18"/><rect x="106" y="56" width="34" height="16" rx="4" fill="#859900" stroke="#000" stroke-opacity="0.18"/><rect x="148" y="56" width="34" height="16" rx="4" fill="#CB4B16" stroke="#000" stroke-opacity="0.18"/><rect x="190" y="56" width="34" height="16" rx="4" fill="#DC322F" stroke="#000" stroke-opacity="0.18"/><rect x="232" y="56" width="34" height="16" rx="4" fill="#93A1A1" stroke="#000" stroke-opacity="0.18"/>
+    </g>
+  </g>
+  <g transform="translate(408,208)">
+    <clipPath id="clip-sepia"><rect width="392" height="88" rx="14"/></clipPath>
+    <rect x="0.5" y="0.5" width="391" height="87" rx="14"
+          fill="#F4ECD8" stroke="#E5D9C4" stroke-width="1"/>
+    <g clip-path="url(#clip-sepia)">
+      <text x="22" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" letter-spacing="0.3" fill="#B58900">Sepia</text>
+      <rect x="22" y="56" width="34" height="16" rx="4" fill="#B58900" stroke="#000" stroke-opacity="0.18"/><rect x="64" y="56" width="34" height="16" rx="4" fill="#5C3C24" stroke="#000" stroke-opacity="0.18"/><rect x="106" y="56" width="34" height="16" rx="4" fill="#859900" stroke="#000" stroke-opacity="0.18"/><rect x="148" y="56" width="34" height="16" rx="4" fill="#CB4B16" stroke="#000" stroke-opacity="0.18"/><rect x="190" y="56" width="34" height="16" rx="4" fill="#DC322F" stroke="#000" stroke-opacity="0.18"/><rect x="232" y="56" width="34" height="16" rx="4" fill="#8A7E72" stroke="#000" stroke-opacity="0.18"/>
+    </g>
+  </g>
+  <g transform="translate(0,312)">
+    <clipPath id="clip-focus-dark"><rect width="392" height="88" rx="14"/></clipPath>
+    <rect x="0.5" y="0.5" width="391" height="87" rx="14"
+          fill="#282C34" stroke="#3E4452" stroke-width="1"/>
+    <g clip-path="url(#clip-focus-dark)">
+      <text x="22" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" letter-spacing="0.3" fill="#C678DD">Focus Dark</text>
+      <rect x="22" y="56" width="34" height="16" rx="4" fill="#C678DD" stroke="#000" stroke-opacity="0.18"/><rect x="64" y="56" width="34" height="16" rx="4" fill="#ABB2BF" stroke="#000" stroke-opacity="0.18"/><rect x="106" y="56" width="34" height="16" rx="4" fill="#98C379" stroke="#000" stroke-opacity="0.18"/><rect x="148" y="56" width="34" height="16" rx="4" fill="#D19A66" stroke="#000" stroke-opacity="0.18"/><rect x="190" y="56" width="34" height="16" rx="4" fill="#E06C75" stroke="#000" stroke-opacity="0.18"/><rect x="232" y="56" width="34" height="16" rx="4" fill="#4B5263" stroke="#000" stroke-opacity="0.18"/>
+    </g>
+  </g>
+  <g transform="translate(408,312)">
+    <rect x="1" y="1" width="390" height="86" rx="14" fill="none"
+          stroke="#8B949E" stroke-width="1.4" stroke-dasharray="5 5" stroke-opacity="0.5"/>
+    <text x="22" y="34" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" letter-spacing="0.3" fill="#8B949E">Fork your own</text>
+    <text x="22" y="58" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#6E7681">Highlight in <tspan fill="#ADBAC7" font-weight="700">/theme</tspan>, press <tspan fill="#ADBAC7" font-weight="700">Ctrl+E</tspan></text>
+    <text x="22" y="75" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13" font-weight="400" fill="#6E7681">to copy &amp; tweak.</text>
+  </g>
+</svg>

@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+
+# IDEs and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Claude Code local configuration
+.claude/*.local.json
+.claude/settings.local.json
+
+# Node dependencies (in case of JS tooling)
+node_modules/
+
+# Full brand/logo kit
+assets/brand/

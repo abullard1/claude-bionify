@@ -1,0 +1,43 @@
+{
+  "name": "claude-bionify",
+  "owner": {
+    "name": "Samuel Ruairí Bullard",
+    "email": "samuel.ruairi.bullard@gmail.com",
+    "url": "https://github.com/abullard1"
+  },
+  "description": "A focused reading aid that brings bionic reading to Claude Code.",
+  "plugins": [
+    {
+      "name": "claude-bionify",
+      "source": "./plugins/claude-bionify",
+      "displayName": "claude-bionify",
+      "description": "Bionic reading for Claude's responses that bolds the leading part of each word to guide your eyes and enable you to read faster.",
+      "author": {
+        "name": "Samuel Ruairí Bullard",
+        "email": "samuel.ruairi.bullard@gmail.com",
+        "url": "https://github.com/abullard1"
+      },
+      "homepage": "https://github.com/abullard1/claude-bionify",
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": [
+        "reading",
+        "accessibility",
+        "productivity",
+        "development",
+        "adhd",
+        "dyslexia",
+        "bionic",
+        "focus",
+        "speed",
+        "tool"
+      ],
+      "tags": [
+        "reading",
+        "adhd",
+        "dyslexia",
+        "focus"
+      ]
+    }
+  ]
+}

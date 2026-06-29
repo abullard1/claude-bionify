@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 416" width="820" height="416" role="img" aria-label="claude-bionify: the same terminal text shown plain, then bionified">
+  <title>claude-bionify — plain vs bionified, in your terminal</title>
+  <defs>
+    <linearGradient id="win" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1A1D22"/><stop offset="1" stop-color="#0D0F13"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.06"/><stop offset="0.35" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="winclip"><rect x="10" y="10" width="800" height="396" rx="16"/></clipPath>
+  </defs>
+  <style>
+    .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 19px; }
+    .lead { font-weight: 700; fill: #FFFFFF; }
+    .tail { fill: #79818B; }
+    .plain { fill: #9098A3; }
+    .wm   { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 17px; font-weight: 700; }
+    .label { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 11.5px; letter-spacing: 2.5px; fill: #5A616B; }
+    .on   { fill: #C4CEDC; }
+    .cap  { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; fill: #565D67; }
+  </style>
+
+  <rect x="10" y="10" width="800" height="396" rx="16" fill="url(#win)" stroke="#2A2F38" stroke-width="1.5"/>
+  <g clip-path="url(#winclip)">
+    <rect x="10" y="10" width="800" height="52" fill="#1F232A"/>
+    <rect x="10" y="10" width="800" height="396" rx="16" fill="url(#rim)"/>
+  </g>
+  <line x1="10" y1="62" x2="810" y2="62" stroke="#272C34" stroke-width="1"/>
+
+  <!-- window controls (monochrome) -->
+  <circle cx="40" cy="36" r="6.5" fill="#4C525B"/>
+  <circle cx="62" cy="36" r="6.5" fill="#3C424B"/>
+  <circle cx="84" cy="36" r="6.5" fill="#31363E"/>
+
+  <!-- title (centred, bionified wordmark) -->
+  <text x="410" y="42" text-anchor="middle" class="wm"><tspan fill="#FFFFFF">clau</tspan><tspan fill="#828A95" font-weight="400">de-</tspan><tspan fill="#FFFFFF">bio</tspan><tspan fill="#828A95" font-weight="400">nify</tspan></text>
+
+  <!-- logo mark in the right corner -->
+  <svg x="742" y="20" width="46" height="32" viewBox="14 52 210 146"><defs><linearGradient id="mc" x1="42" y1="0" x2="86" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#C4CEDC"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient><linearGradient id="mp" x1="116" y1="0" x2="228" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset="0.12" stop-color="#fff" stop-opacity="1"/><stop offset="0.34" stop-color="#fff" stop-opacity="0.82"/><stop offset="0.58" stop-color="#fff" stop-opacity="0.5"/><stop offset="0.78" stop-color="#fff" stop-opacity="0.22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs><path d="M42,80 L80,125 L42,170" fill="none" stroke="url(#mc)" stroke-width="23" stroke-linecap="round" stroke-linejoin="round"/><rect x="116" y="110.5" width="112" height="29" rx="14.5" fill="url(#mp)"/></svg>
+
+  <!-- plain -->
+  <text x="44" y="110" class="label">PLAIN</text>
+  <text x="44" y="146" class="mono plain">Bionic reading bolds the first part of</text>
+  <text x="44" y="178" class="mono plain">each word so your eyes can move faster.</text>
+
+  <line x1="44" y1="214" x2="776" y2="214" stroke="#21262d" stroke-width="1"/>
+
+  <!-- bionified -->
+  <text x="44" y="250" class="label on">BIONIFIED</text>
+  <text x="44" y="286" class="mono"><tspan class="lead">Bio</tspan><tspan class="tail">nic </tspan><tspan class="lead">read</tspan><tspan class="tail">ing </tspan><tspan class="lead">bol</tspan><tspan class="tail">ds </tspan><tspan class="tail">the </tspan><tspan class="lead">fir</tspan><tspan class="tail">st </tspan><tspan class="lead">pa</tspan><tspan class="tail">rt </tspan><tspan class="tail">of </tspan></text>
+  <text x="44" y="318" class="mono"><tspan class="lead">ea</tspan><tspan class="tail">ch </tspan><tspan class="lead">wo</tspan><tspan class="tail">rd </tspan><tspan class="tail">so </tspan><tspan class="lead">yo</tspan><tspan class="tail">ur </tspan><tspan class="lead">ey</tspan><tspan class="tail">es </tspan><tspan class="tail">can </tspan><tspan class="lead">mo</tspan><tspan class="tail">ve </tspan><tspan class="lead">fas</tspan><tspan class="tail">ter. </tspan></text>
+
+  <text x="44" y="372" class="cap">Rendered live in your terminal as Claude replies.</text>
+</svg>

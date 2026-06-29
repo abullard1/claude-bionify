@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/abullard1/claude-bionify/discussions
+    about: Ask questions or share ideas in Discussions.

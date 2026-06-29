@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+# Least-privilege token: CI only reads the repo. No job writes to it.
+permissions:
+  contents: read
+
+# Cancel an in-flight run when a branch gets new commits, so superseded
+# pushes don't sit in the queue burning minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # The MessageDisplay hook runs under whatever `python3` the user has, so the
+  # suite is exercised across the supported range. 3.10 is the floor: the code
+  # uses PEP 604 unions (`str | None`) evaluated at definition time.
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install pytest pytest-cov
+      - run: >-
+          pytest tests/ -q
+          --cov=plugins/claude-bionify/scripts
+          --cov-report=term-missing
+          --cov-fail-under=80
+
+  # ruff is interpreter-independent, so it runs once rather than per matrix cell.
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check plugins/claude-bionify/scripts tests assets
+      # themes.svg is generated from the theme JSONs; fail if the committed copy is stale.
+      - name: Check themes.svg is up to date
+        run: |
+          python assets/generate_themes.py
+          if ! git diff --quiet assets/themes.svg; then
+            echo "::error::assets/themes.svg is out of date. Run: python assets/generate_themes.py"
+            git diff assets/themes.svg
+            exit 1
+          fi
+
+  # `claude plugin validate --strict` is the source-of-truth schema check for
+  # the marketplace and plugin manifests (the same command the official
+  # anthropics/claude-plugins-official directory gates on). --strict fails on
+  # unrecognized fields and missing metadata the runtime would otherwise
+  # tolerate. Validation is offline, so no API key is needed.
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install -g @anthropic-ai/claude-code
+      - run: claude plugin validate . --strict
+      - run: claude plugin validate ./plugins/claude-bionify --strict

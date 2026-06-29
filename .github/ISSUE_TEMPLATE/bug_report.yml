@@ -1,0 +1,46 @@
+name: Bug report
+description: Report something that is not working as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: input
+    id: cc-version
+    attributes:
+      label: Claude Code version
+      placeholder: "output of: claude --version"
+    validations:
+      required: true
+  - type: input
+    id: plugin-version
+    attributes:
+      label: claude-bionify version
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: OS and terminal
+      placeholder: "e.g. Pop!_OS 24.04, Alacritty"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Debug output (optional)
+      description: Run with CLAUDE_BIONIFY_DEBUG=1 and paste any error.
+      render: shell
