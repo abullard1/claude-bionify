@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-d97757)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.0.0-success)
+![Version](https://img.shields.io/badge/version-1.0.1-success)
 [![CI](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml/badge.svg)](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/samuelbullard)
 
@@ -77,7 +77,7 @@ Change claude-bionify mid-session without a reload or any config editing. The ne
 | `/claude-bionify:on` · `/claude-bionify:off` | Turn it on or off explicitly |
 | `/claude-bionify:set strength 0.7` | Set fixation strength (`0.1`–`0.9`) |
 | `/claude-bionify:set boundary syllable` | Switch boundary (`fraction` · `syllable` · `log`) |
-| `/claude-bionify:set minlen 5` · `set acronyms off` · `set urls off` · `set headings off` | Tweak the other settings |
+| `/claude-bionify:set minlen 5` · `/claude-bionify:set acronyms off` · `/claude-bionify:set urls off` · `/claude-bionify:set headings off` | Tweak the other settings |
 | `/claude-bionify:status` | Show the active overrides |
 | `/claude-bionify:reset` | Clear overrides, back to your configured defaults |
 

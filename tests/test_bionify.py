@@ -316,6 +316,13 @@ class TestControlIntegration:
         assert style.boundary == "syllable"
         assert style.fixation == 0.8
 
+    def test_state_file_without_directory_component_is_saved(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("CLAUDE_BIONIFY_STATE_FILE", "runtime.json")
+        self._run(capsys, ["set", "fixation", "0.8"])
+        assert json.loads((tmp_path / "runtime.json").read_text()) == {"fixation": 0.8}
+        assert bionify.load_config().fixation == 0.8
+
     def test_reset_restores_defaults(self, capsys):
         self._run(capsys, ["off"])
         assert bionify.load_config() is None
