@@ -87,6 +87,12 @@ class TestUrlProtection:
         assert core.bionify_text("visit https://example.com today", Style()) == \
             "**vis**it https://example.com **tod**ay"
 
+    def test_url_protection_stops_before_quotes_and_brackets(self):
+        assert core.bionify_text('visit "https://example.com/docs" now', Style()) == \
+            '**vis**it "https://example.com/docs" now'
+        assert core.bionify_text("open (https://example.com/docs) now", Style()) == \
+            "**op**en (https://example.com/docs) now"
+
     def test_email_is_protected(self):
         assert core.bionify_text("mail user@example.com please", Style()) == \
             "**ma**il user@example.com **ple**ase"
@@ -324,11 +330,12 @@ class TestControlIntegration:
 
 class TestFenceDetection:
     def test_real_fences_toggle(self):
-        for marker in ("```", "```python", "```python {.line-numbers}", "````", "~~~", "   ```js"):
+        for marker in ("```", "```python", "``` python", "```python {.line-numbers}",
+                       "````", "~~~", "   ```js"):
             assert core._is_fence(marker), marker
 
     def test_prose_starting_with_backticks_is_not_a_fence(self):
-        for line in ("``` is the marker", "``` and then you write", "Use ``` to open"):
+        for line in ("Use ``` to open", "Use ~~~ to open"):
             assert not core._is_fence(line), line
 
 
@@ -369,13 +376,13 @@ class TestSkipHeadings:
         assert "**inde**nted" in text
 
     def test_prose_line_with_backticks_does_not_suppress_bolding(self):
-        delta = "``` is the marker\nThis sentence should be bolded."
+        delta = "Use ``` as the marker\nThis sentence should be bolded."
         text, inside = core.transform(delta, False, FRACTION)
         assert inside is False  # not flipped into code mode
         assert "**Th**is" in text  # the following line is still bolded
 
     def test_info_string_fence_still_protects_code(self):
-        delta = "```python {.line-numbers}\nsecret_code = 42\n```"
+        delta = "``` python {.line-numbers}\nsecret_code = 42\n```"
         text, inside = core.transform(delta, False, FRACTION)
         assert "secret_code = 42" in text  # code left untouched
         assert inside is False
@@ -418,10 +425,21 @@ class TestControlSet:
         state, msg = control.apply({}, ["set", "minlen", "x"])
         assert "min_length" not in state and "whole number" in msg
 
+        state, msg = control.apply({}, ["set", "minlen", "4.9"])
+        assert "min_length" not in state and "whole number" in msg
+
+    def test_set_min_length_alias_is_not_accepted(self):
+        state, msg = control.apply({}, ["set", "min_length", "5"])
+        assert "min_length" not in state and "unknown option" in msg
+
     def test_set_acronyms_and_urls_toggle(self):
         assert control.apply({}, ["set", "acronyms", "off"])[0]["skip_acronyms"] is False
         assert control.apply({}, ["set", "acronyms", "on"])[0]["skip_acronyms"] is True
         assert control.apply({}, ["set", "urls", "off"])[0]["protect_urls"] is False
+
+    def test_set_boolean_rejects_typos(self):
+        state, msg = control.apply({}, ["set", "acronyms", "maybe"])
+        assert "skip_acronyms" not in state and "not on or off" in msg
 
     def test_set_headings_toggle(self):
         assert control.apply({}, ["set", "headings", "off"])[0]["skip_headings"] is False
