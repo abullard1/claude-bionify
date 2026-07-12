@@ -3,6 +3,14 @@
 All notable changes to claude-bionify are documented here. This project follows
 [semantic versioning](https://semver.org) and [Keep a Changelog](https://keepachangelog.com).
 
+## [1.0.2] - 2026-07-12
+
+### Changed
+- The claude-bionify skill now confirms the plugin is installed before giving
+  settings or command guidance. Skill marketplaces can surface the skill on its
+  own, so when the plugin is missing the skill now says so and points to the
+  install commands instead of walking through controls that are not there.
+
 ## [1.0.1] - 2026-07-04
 
 ### Fixed
