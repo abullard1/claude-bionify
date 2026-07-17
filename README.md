@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-d97757)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.0.1-success)
+![Version](https://img.shields.io/badge/version-1.0.2-success)
 [![CI](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml/badge.svg)](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/samuelbullard)
 
