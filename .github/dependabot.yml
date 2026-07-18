@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # claude-bionify has no runtime dependencies, so the only ecosystem to track
+  # is the GitHub Actions pinned in .github/workflows/. Dependabot opens a PR
+  # when a pinned action gets a new release or a security advisory.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    groups:
+      # Batch routine action bumps into one PR instead of one-per-action.
+      actions:
+        patterns:
+          - "*"
