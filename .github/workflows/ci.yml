@@ -1,7 +1,12 @@
 name: CI
 
 on:
+  # Scope push to main only. PRs from same-repo branches already run via the
+  # pull_request event, so an unscoped push trigger ran every job twice and
+  # doubled Actions minutes. This keeps branch coverage (PR event) and main
+  # coverage (push event) without the overlap.
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
