@@ -214,8 +214,10 @@ Built by Samuel Ruairí Bullard. If claude-bionify makes your reading easier, a 
 [MIT](LICENSE) © 2026 [Samuel Ruairí Bullard](https://github.com/abullard1).
 
 ## Star History
-
-<!-- Activates once the repo is public. -->
-<a href="https://star-history.com/#abullard1/claude-bionify&Date">
-  <img src="https://api.star-history.com/svg?repos=abullard1/claude-bionify&type=Date" alt="Star History Chart" width="600">
+<a href="https://www.star-history.com/?repos=abullard1%2Fclaude-bionify&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=abullard1/claude-bionify&type=date&theme=dark&legend=top-left&sealed_token=kIZ0D_7-6Pa8BK1jH0HjWmuz3fgXQu_MxoGN2fb2Xl7Zx5xPyHhpb2qJexL9w3hQQ9lWsC0lFZFqcXwMKe1aE0s8_PFRjbZ5ZWdKKIiufkZCq0RJuqWjSY9QuKxg4oVqDtoTNCcM0QPAnCew2WoiLDjgrbgAIKjX0O4tNiD-jYcbqa1IdgDdIPPSMe7Y" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=abullard1/claude-bionify&type=date&legend=top-left&sealed_token=kIZ0D_7-6Pa8BK1jH0HjWmuz3fgXQu_MxoGN2fb2Xl7Zx5xPyHhpb2qJexL9w3hQQ9lWsC0lFZFqcXwMKe1aE0s8_PFRjbZ5ZWdKKIiufkZCq0RJuqWjSY9QuKxg4oVqDtoTNCcM0QPAnCew2WoiLDjgrbgAIKjX0O4tNiD-jYcbqa1IdgDdIPPSMe7Y" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=abullard1/claude-bionify&type=date&legend=top-left&sealed_token=kIZ0D_7-6Pa8BK1jH0HjWmuz3fgXQu_MxoGN2fb2Xl7Zx5xPyHhpb2qJexL9w3hQQ9lWsC0lFZFqcXwMKe1aE0s8_PFRjbZ5ZWdKKIiufkZCq0RJuqWjSY9QuKxg4oVqDtoTNCcM0QPAnCew2WoiLDjgrbgAIKjX0O4tNiD-jYcbqa1IdgDdIPPSMe7Y" />
+ </picture>
 </a>
