@@ -22,7 +22,8 @@ import settings
 
 def _apply_set(state: dict, rest: list) -> tuple[dict, str]:
     if len(rest) < 2:
-        return state, "claude-bionify: set <fixation|boundary|minlen|acronyms|urls|headings> <value>"
+        return state, ("claude-bionify: set "
+                       "<fixation|boundary|minlen|acronyms|urls|headings> <value>")
     key, value = rest[0].lower(), rest[1]
     setting = settings.by_cli_key(key)
     if setting is None:

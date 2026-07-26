@@ -1,11 +1,23 @@
 [tool.ruff]
 target-version = "py310"
+line-length = 100
 
 [tool.ruff.lint]
 # Stated explicitly rather than inherited: ruff's default rule set widened in
 # 0.16, which turned the tree red with no code change. Pinning the version and
 # naming the rules keeps the gate reproducible.
-select = ["E4", "E7", "E9", "F"]
+select = ["E", "F", "I", "B", "SIM", "UP", "RUF", "EXE"]
+ignore = [
+    # transform() is a four-way decision table (fence marker, inside a fence,
+    # skipped heading, prose). Merging two arms with `or` would fuse unrelated
+    # reasons and read worse than the table.
+    "SIM114",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# The SVG templates are triple-quoted, so a trailing noqa would land in the
+# generated file, and an f-string replacement field cannot be split before 3.12.
+"assets/generate_themes.py" = ["E501"]
 
 [tool.pytest.ini_options]
 # PEP 597: with PYTHONWARNDEFAULTENCODING=1, text I/O that relies on the
