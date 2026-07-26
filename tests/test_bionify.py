@@ -2,7 +2,9 @@
 
 import io
 import json
+import os
 import pathlib
+import subprocess
 import sys
 
 import pytest
@@ -517,6 +519,43 @@ class TestManifestConsistency:
         assert user_config["fixation"]["min"] == settings.clamp_fixation(0.0)
         assert user_config["fixation"]["max"] == settings.clamp_fixation(1.0)
         assert user_config["min_word_length"]["min"] == settings.clamp_min_length(0)
+
+
+class TestSubprocessStdio:
+    """Drive the scripts as Claude Code does: child processes reading a pipe.
+
+    The in-process tests substitute their own streams, so only these exercise the
+    encoding the platform actually applies to a pipe.
+    """
+
+    @staticmethod
+    def _run(script, argv=(), stdin=b""):
+        env = dict(os.environ)
+        for var in ("PYTHONUTF8", "PYTHONIOENCODING"):
+            env.pop(var, None)          # let the platform default stand
+        return subprocess.run([sys.executable, str(script), *argv], input=stdin,
+                              capture_output=True, env=env, check=True).stdout
+
+    def test_pipe_is_not_utf8_on_windows(self):
+        """Guard: on a UTF-8 runner the two tests below would prove nothing."""
+        if sys.platform != "win32":
+            pytest.skip("only Windows defaults a pipe to a non-UTF-8 codepage")
+        enc = subprocess.run(
+            [sys.executable, "-c", "import sys; print(sys.stdin.encoding)"],
+            input=b"", capture_output=True, check=True).stdout.decode().strip()
+        assert enc.lower().replace("-", "") not in ("utf8", "cp65001"), \
+            f"runner pipes are already {enc}; these tests are vacuous"
+
+    def test_hook_roundtrips_non_ascii(self):
+        payload = json.dumps({"delta": "dash \u2014 quote \u201d here", "final": True},
+                             ensure_ascii=False).encode("utf-8")
+        out = self._run(_SCRIPTS / "bionify.py", stdin=payload)
+        assert (json.loads(out)["hookSpecificOutput"]["displayContent"]
+                == "**da**sh \u2014 **quo**te \u201d **he**re")
+
+    def test_control_status_line_is_utf8(self):
+        out = self._run(_SCRIPTS / "control.py", ["status"])
+        assert "\u00b7" in out.decode("utf-8")
 
 
 class TestHookFencingIntegration:

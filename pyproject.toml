@@ -1,3 +1,12 @@
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+# Stated explicitly rather than inherited: ruff's default rule set widened in
+# 0.16, which turned the tree red with no code change. Pinning the version and
+# naming the rules keeps the gate reproducible.
+select = ["E4", "E7", "E9", "F"]
+
 [tool.pytest.ini_options]
 # PEP 597: with PYTHONWARNDEFAULTENCODING=1, text I/O that relies on the
 # locale encoding fails the build.
