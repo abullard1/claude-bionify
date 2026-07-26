@@ -144,7 +144,8 @@ def parse_event(raw: dict) -> DisplayEvent:
 
 def main() -> None:
     try:
-        event = parse_event(json.loads(sys.stdin.read() or "{}"))
+        # JSON is UTF-8 on the wire; sys.stdin would apply the locale encoding.
+        event = parse_event(json.loads(sys.stdin.buffer.read() or b"{}"))
         if not event.delta:
             return
 
@@ -158,12 +159,13 @@ def main() -> None:
         display, inside_fence = core.transform(event.delta, inside_fence, style)
         write_fence_state(event.message_id, inside_fence, event.final)
 
+        # ensure_ascii keeps the payload ASCII, so stdout encodes under any locale.
         json.dump({
             "hookSpecificOutput": {
                 "hookEventName": "MessageDisplay",
                 "displayContent": display,
             }
-        }, sys.stdout)
+        }, sys.stdout, ensure_ascii=True)
     except Exception:
         # Crash-safe: emit nothing so Claude Code renders the original text.
         if os.environ.get("CLAUDE_BIONIFY_DEBUG"):

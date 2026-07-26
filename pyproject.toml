@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+# PEP 597: with PYTHONWARNDEFAULTENCODING=1, text I/O that relies on the
+# locale encoding fails the build.
+filterwarnings = ["error::EncodingWarning"]

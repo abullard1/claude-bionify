@@ -27,6 +27,18 @@ def _isolate_state(tmp_path, monkeypatch):
     monkeypatch.setenv("CLAUDE_BIONIFY_STATE_FILE", str(tmp_path / "runtime.json"))
 
 
+def hook_stdout(encoding="utf-8"):
+    """A stdout with a text layer in `encoding`, plus the raw bytes behind it."""
+    raw = io.BytesIO()
+    return io.TextIOWrapper(raw, encoding=encoding, errors="replace"), raw
+
+
+def hook_stdin(payload, encoding="utf-8"):
+    """stdin as the hook receives it: UTF-8 bytes under a text layer in `encoding`."""
+    return io.TextIOWrapper(io.BytesIO(payload.encode("utf-8")),
+                            encoding=encoding, errors="surrogateescape")
+
+
 class TestBionifyWord:
     def test_bolds_leading_half(self):
         assert core.bionify_word("reading", FRACTION) == "**read**ing"
@@ -239,8 +251,8 @@ class TestConfig:
 
 
 class TestMain:
-    def _run(self, monkeypatch, capsys, payload):
-        monkeypatch.setattr("sys.stdin", io.StringIO(payload))
+    def _run(self, monkeypatch, capsys, payload, encoding="utf-8"):
+        monkeypatch.setattr("sys.stdin", hook_stdin(payload, encoding))
         bionify.main()
         return capsys.readouterr().out
 
@@ -262,9 +274,19 @@ class TestMain:
     def test_empty_delta_is_silent(self, monkeypatch, capsys):
         assert self._run(monkeypatch, capsys, json.dumps({"delta": ""})) == ""
 
+    @pytest.mark.parametrize("encoding", ["utf-8", "cp1252"])
+    def test_non_ascii_survives_the_platform_stdio_encoding(
+            self, monkeypatch, capsys, encoding):
+        """ensure_ascii=False is required; ASCII escapes would skip the decode."""
+        payload = json.dumps({"delta": "dashes \u2014 and quotes \u201d here"},
+                             ensure_ascii=False)
+        out = self._run(monkeypatch, capsys, payload, encoding)
+        assert (json.loads(out)["hookSpecificOutput"]["displayContent"]
+                == "**das**hes \u2014 and **quo**tes \u201d **he**re")
+
     def test_debug_env_reraises(self, monkeypatch):
         monkeypatch.setenv("CLAUDE_BIONIFY_DEBUG", "1")
-        monkeypatch.setattr("sys.stdin", io.StringIO("not json at all"))
+        monkeypatch.setattr("sys.stdin", hook_stdin("not json at all"))
         with pytest.raises(Exception):
             bionify.main()
 
@@ -300,6 +322,16 @@ class TestControlApply:
         assert state == {"enabled": False}
 
 
+class TestControlStreamEncoding:
+    def test_status_line_is_utf8_regardless_of_platform_codepage(self, monkeypatch):
+        """The status separator is non-ASCII, so the bytes must be UTF-8."""
+        stdout, raw = hook_stdout("cp1252")
+        monkeypatch.setattr("sys.stdout", stdout)
+        control.main(["status"])
+        stdout.flush()
+        assert "\u00b7" in raw.getvalue().decode("utf-8")
+
+
 class TestControlIntegration:
     def _run(self, capsys, argv):
         control.main(argv)
@@ -320,7 +352,8 @@ class TestControlIntegration:
         monkeypatch.chdir(tmp_path)
         monkeypatch.setenv("CLAUDE_BIONIFY_STATE_FILE", "runtime.json")
         self._run(capsys, ["set", "fixation", "0.8"])
-        assert json.loads((tmp_path / "runtime.json").read_text()) == {"fixation": 0.8}
+        saved = (tmp_path / "runtime.json").read_text(encoding="utf-8")
+        assert json.loads(saved) == {"fixation": 0.8}
         assert bionify.load_config().fixation == 0.8
 
     def test_reset_restores_defaults(self, capsys):
@@ -471,7 +504,7 @@ class TestManifestConsistency:
 
     def test_settings_match_the_plugin_manifest(self):
         manifest = json.loads(
-            (_SCRIPTS.parent / ".claude-plugin" / "plugin.json").read_text())
+            (_SCRIPTS.parent / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
         user_config = manifest["userConfig"]
         by_manifest = {s.manifest_key: s for s in settings.SETTINGS}
 
@@ -493,7 +526,7 @@ class TestHookFencingIntegration:
     """
 
     def _emit(self, monkeypatch, capsys, event):
-        monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(event)))
+        monkeypatch.setattr("sys.stdin", hook_stdin(json.dumps(event)))
         bionify.main()
         return capsys.readouterr().out
 

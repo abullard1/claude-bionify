@@ -26,6 +26,9 @@ jobs:
   # uses PEP 604 unions (`str | None`) evaluated at definition time.
   test:
     runs-on: ubuntu-latest
+    # PEP 597, promoted to an error in pyproject.toml.
+    env:
+      PYTHONWARNDEFAULTENCODING: 1
     strategy:
       fail-fast: false
       matrix:
@@ -55,7 +58,8 @@ jobs:
       # themes.svg is generated from the theme JSONs; fail if the committed copy is stale.
       - name: Check themes.svg is up to date
         run: |
-          python assets/generate_themes.py
+          python -X warn_default_encoding -W error::EncodingWarning \
+            assets/generate_themes.py
           if ! git diff --quiet assets/themes.svg; then
             echo "::error::assets/themes.svg is out of date. Run: python assets/generate_themes.py"
             git diff assets/themes.svg
