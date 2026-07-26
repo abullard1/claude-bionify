@@ -25,25 +25,38 @@ jobs:
   # suite is exercised across the supported range. 3.10 is the floor: the code
   # uses PEP 604 unions (`str | None`) evaluated at definition time.
   test:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     # PEP 597, promoted to an error in pyproject.toml.
     env:
       PYTHONWARNDEFAULTENCODING: 1
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
-        include:
-          # The hook reads its event from a pipe, which Windows decodes with the
-          # ANSI codepage rather than UTF-8. One cell covers that path.
-          - os: windows-latest
-            python-version: "3.13"
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+      - run: pip install pytest pytest-cov
+      - run: >-
+          pytest tests/ -q
+          --cov=plugins/claude-bionify/scripts
+          --cov-report=term-missing
+          --cov-fail-under=80
+
+  # A separate job rather than a matrix cell, so the `test (3.x)` job names stay
+  # stable. The hook reads its event from a pipe, and Windows decodes a pipe with
+  # the ANSI codepage rather than UTF-8, which no Linux cell can exercise.
+  test-windows:
+    runs-on: windows-latest
+    env:
+      PYTHONWARNDEFAULTENCODING: 1
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
       - run: pip install pytest pytest-cov
       - run: >-
           pytest tests/ -q
