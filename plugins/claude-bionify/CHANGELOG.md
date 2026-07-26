@@ -3,6 +3,20 @@
 All notable changes to claude-bionify are documented here. This project follows
 [semantic versioning](https://semver.org) and [Keep a Changelog](https://keepachangelog.com).
 
+## [1.0.3] - 2026-07-26
+
+### Fixed
+- Non-ASCII characters no longer garble on Windows. Python decodes a pipe with
+  the system ANSI codepage rather than UTF-8, so em dashes and curly quotes in
+  Claude's replies arrived corrupted before being bolded. The hook now reads its
+  event as bytes and lets JSON decode it. Thanks to @aermak for the report.
+- `/claude-bionify:status` and the other control commands no longer emit an
+  undecodable separator on Windows. The status line is now written as UTF-8
+  bytes instead of being encoded with the platform codepage, which produced a
+  broken glyph on Western systems and failed outright on Japanese ones.
+- `assets/generate_themes.py` reads and writes UTF-8 explicitly, so regenerating
+  `themes.svg` produces the same file on any platform.
+
 ## [1.0.2] - 2026-07-12
 
 ### Changed

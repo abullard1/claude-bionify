@@ -2,7 +2,9 @@
 
 import io
 import json
+import os
 import pathlib
+import subprocess
 import sys
 
 import pytest
@@ -25,6 +27,18 @@ SYLLABLE = Style(fixation=0.5, min_length=4, boundary="syllable")
 def _isolate_state(tmp_path, monkeypatch):
     """Point the override file at an isolated, initially-absent tmp path."""
     monkeypatch.setenv("CLAUDE_BIONIFY_STATE_FILE", str(tmp_path / "runtime.json"))
+
+
+def hook_stdout(encoding="utf-8"):
+    """A stdout with a text layer in `encoding`, plus the raw bytes behind it."""
+    raw = io.BytesIO()
+    return io.TextIOWrapper(raw, encoding=encoding, errors="replace"), raw
+
+
+def hook_stdin(payload, encoding="utf-8"):
+    """stdin as the hook receives it: UTF-8 bytes under a text layer in `encoding`."""
+    return io.TextIOWrapper(io.BytesIO(payload.encode("utf-8")),
+                            encoding=encoding, errors="surrogateescape")
 
 
 class TestBionifyWord:
@@ -239,8 +253,8 @@ class TestConfig:
 
 
 class TestMain:
-    def _run(self, monkeypatch, capsys, payload):
-        monkeypatch.setattr("sys.stdin", io.StringIO(payload))
+    def _run(self, monkeypatch, capsys, payload, encoding="utf-8"):
+        monkeypatch.setattr("sys.stdin", hook_stdin(payload, encoding))
         bionify.main()
         return capsys.readouterr().out
 
@@ -262,9 +276,19 @@ class TestMain:
     def test_empty_delta_is_silent(self, monkeypatch, capsys):
         assert self._run(monkeypatch, capsys, json.dumps({"delta": ""})) == ""
 
+    @pytest.mark.parametrize("encoding", ["utf-8", "cp1252"])
+    def test_non_ascii_survives_the_platform_stdio_encoding(
+            self, monkeypatch, capsys, encoding):
+        """ensure_ascii=False is required; ASCII escapes would skip the decode."""
+        payload = json.dumps({"delta": "dashes \u2014 and quotes \u201d here"},
+                             ensure_ascii=False)
+        out = self._run(monkeypatch, capsys, payload, encoding)
+        assert (json.loads(out)["hookSpecificOutput"]["displayContent"]
+                == "**das**hes \u2014 and **quo**tes \u201d **he**re")
+
     def test_debug_env_reraises(self, monkeypatch):
         monkeypatch.setenv("CLAUDE_BIONIFY_DEBUG", "1")
-        monkeypatch.setattr("sys.stdin", io.StringIO("not json at all"))
+        monkeypatch.setattr("sys.stdin", hook_stdin("not json at all"))
         with pytest.raises(Exception):
             bionify.main()
 
@@ -300,6 +324,16 @@ class TestControlApply:
         assert state == {"enabled": False}
 
 
+class TestControlStreamEncoding:
+    def test_status_line_is_utf8_regardless_of_platform_codepage(self, monkeypatch):
+        """The status separator is non-ASCII, so the bytes must be UTF-8."""
+        stdout, raw = hook_stdout("cp1252")
+        monkeypatch.setattr("sys.stdout", stdout)
+        control.main(["status"])
+        stdout.flush()
+        assert "\u00b7" in raw.getvalue().decode("utf-8")
+
+
 class TestControlIntegration:
     def _run(self, capsys, argv):
         control.main(argv)
@@ -320,7 +354,8 @@ class TestControlIntegration:
         monkeypatch.chdir(tmp_path)
         monkeypatch.setenv("CLAUDE_BIONIFY_STATE_FILE", "runtime.json")
         self._run(capsys, ["set", "fixation", "0.8"])
-        assert json.loads((tmp_path / "runtime.json").read_text()) == {"fixation": 0.8}
+        saved = (tmp_path / "runtime.json").read_text(encoding="utf-8")
+        assert json.loads(saved) == {"fixation": 0.8}
         assert bionify.load_config().fixation == 0.8
 
     def test_reset_restores_defaults(self, capsys):
@@ -471,7 +506,7 @@ class TestManifestConsistency:
 
     def test_settings_match_the_plugin_manifest(self):
         manifest = json.loads(
-            (_SCRIPTS.parent / ".claude-plugin" / "plugin.json").read_text())
+            (_SCRIPTS.parent / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
         user_config = manifest["userConfig"]
         by_manifest = {s.manifest_key: s for s in settings.SETTINGS}
 
@@ -486,6 +521,43 @@ class TestManifestConsistency:
         assert user_config["min_word_length"]["min"] == settings.clamp_min_length(0)
 
 
+class TestSubprocessStdio:
+    """Drive the scripts as Claude Code does: child processes reading a pipe.
+
+    The in-process tests substitute their own streams, so only these exercise the
+    encoding the platform actually applies to a pipe.
+    """
+
+    @staticmethod
+    def _run(script, argv=(), stdin=b""):
+        env = dict(os.environ)
+        for var in ("PYTHONUTF8", "PYTHONIOENCODING"):
+            env.pop(var, None)          # let the platform default stand
+        return subprocess.run([sys.executable, str(script), *argv], input=stdin,
+                              capture_output=True, env=env, check=True).stdout
+
+    def test_pipe_is_not_utf8_on_windows(self):
+        """Guard: on a UTF-8 runner the two tests below would prove nothing."""
+        if sys.platform != "win32":
+            pytest.skip("only Windows defaults a pipe to a non-UTF-8 codepage")
+        enc = subprocess.run(
+            [sys.executable, "-c", "import sys; print(sys.stdin.encoding)"],
+            input=b"", capture_output=True, check=True).stdout.decode().strip()
+        assert enc.lower().replace("-", "") not in ("utf8", "cp65001"), \
+            f"runner pipes are already {enc}; these tests are vacuous"
+
+    def test_hook_roundtrips_non_ascii(self):
+        payload = json.dumps({"delta": "dash \u2014 quote \u201d here", "final": True},
+                             ensure_ascii=False).encode("utf-8")
+        out = self._run(_SCRIPTS / "bionify.py", stdin=payload)
+        assert (json.loads(out)["hookSpecificOutput"]["displayContent"]
+                == "**da**sh \u2014 **quo**te \u201d **he**re")
+
+    def test_control_status_line_is_utf8(self):
+        out = self._run(_SCRIPTS / "control.py", ["status"])
+        assert "\u00b7" in out.decode("utf-8")
+
+
 class TestHookFencingIntegration:
     """Drive main() across streamed deltas the way Claude Code does, to prove a
     code block that spans deltas stays verbatim. Claude Code sends the message id
@@ -493,7 +565,7 @@ class TestHookFencingIntegration:
     """
 
     def _emit(self, monkeypatch, capsys, event):
-        monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(event)))
+        monkeypatch.setattr("sys.stdin", hook_stdin(json.dumps(event)))
         bionify.main()
         return capsys.readouterr().out
 

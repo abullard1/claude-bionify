@@ -26,6 +26,9 @@ jobs:
   # uses PEP 604 unions (`str | None`) evaluated at definition time.
   test:
     runs-on: ubuntu-latest
+    # PEP 597, promoted to an error in pyproject.toml.
+    env:
+      PYTHONWARNDEFAULTENCODING: 1
     strategy:
       fail-fast: false
       matrix:
@@ -42,6 +45,25 @@ jobs:
           --cov-report=term-missing
           --cov-fail-under=80
 
+  # A separate job rather than a matrix cell, so the `test (3.x)` job names stay
+  # stable. The hook reads its event from a pipe, and Windows decodes a pipe with
+  # the ANSI codepage rather than UTF-8, which no Linux cell can exercise.
+  test-windows:
+    runs-on: windows-latest
+    env:
+      PYTHONWARNDEFAULTENCODING: 1
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - run: pip install pytest pytest-cov
+      - run: >-
+          pytest tests/ -q
+          --cov=plugins/claude-bionify/scripts
+          --cov-report=term-missing
+          --cov-fail-under=80
+
   # ruff is interpreter-independent, so it runs once rather than per matrix cell.
   lint:
     runs-on: ubuntu-latest
@@ -50,12 +72,13 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      - run: pip install ruff
+      - run: pip install ruff==0.16.0
       - run: ruff check plugins/claude-bionify/scripts tests assets
       # themes.svg is generated from the theme JSONs; fail if the committed copy is stale.
       - name: Check themes.svg is up to date
         run: |
-          python assets/generate_themes.py
+          python -X warn_default_encoding -W error::EncodingWarning \
+            assets/generate_themes.py
           if ! git diff --quiet assets/themes.svg; then
             echo "::error::assets/themes.svg is out of date. Run: python assets/generate_themes.py"
             git diff assets/themes.svg

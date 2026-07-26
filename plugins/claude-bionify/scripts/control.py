@@ -62,7 +62,8 @@ def main(argv: list) -> None:
         overrides.clear()
     else:
         overrides.save(new_state)
-    print(message)
+    # Output is read as UTF-8; print() would apply the locale encoding.
+    sys.stdout.buffer.write(message.encode("utf-8") + b"\n")
 
 
 if __name__ == "__main__":

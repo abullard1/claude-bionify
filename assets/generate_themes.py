@@ -59,7 +59,7 @@ def load_themes() -> list[Theme]:
     """Load the themes named in ORDER, in that order."""
     themes = []
     for slug in ORDER:
-        data = json.loads((THEMES_DIR / f"{slug}.json").read_text())
+        data = json.loads((THEMES_DIR / f"{slug}.json").read_text(encoding="utf-8"))
         themes.append(Theme(
             slug=slug,
             name=data["name"],
@@ -137,7 +137,7 @@ def build_svg(themes: list[Theme]) -> str:
 
 
 def main() -> None:
-    OUTPUT.write_text(build_svg(load_themes()))
+    OUTPUT.write_text(build_svg(load_themes()), encoding="utf-8")
     print(f"wrote {OUTPUT.relative_to(ROOT)}")
 
 
