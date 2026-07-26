@@ -12,6 +12,7 @@ writes to stdout. It is crash-safe: on any error it prints nothing, so Claude
 Code falls back to the original text. Set CLAUDE_BIONIFY_DEBUG=1 to re-raise instead.
 """
 
+import contextlib
 import json
 import os
 import re
@@ -55,10 +56,8 @@ def _fence_path(data_dir: str, message_id: str) -> str:
 
 
 def _remove_quietly(path: str) -> None:
-    try:
+    with contextlib.suppress(OSError):
         os.remove(path)
-    except OSError:
-        pass
 
 
 def read_fence_state(message_id: str, index: int | None) -> bool:

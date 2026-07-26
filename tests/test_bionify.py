@@ -12,10 +12,10 @@ import pytest
 _SCRIPTS = pathlib.Path(__file__).parent.parent / "plugins" / "claude-bionify" / "scripts"
 sys.path.insert(0, str(_SCRIPTS))
 
-import core  # noqa: E402
-import overrides  # noqa: E402
 import bionify  # noqa: E402
 import control  # noqa: E402
+import core  # noqa: E402
+import overrides  # noqa: E402
 import settings  # noqa: E402
 
 Style = settings.Style
@@ -289,7 +289,7 @@ class TestMain:
     def test_debug_env_reraises(self, monkeypatch):
         monkeypatch.setenv("CLAUDE_BIONIFY_DEBUG", "1")
         monkeypatch.setattr("sys.stdin", hook_stdin("not json at all"))
-        with pytest.raises(Exception):
+        with pytest.raises(json.JSONDecodeError):
             bionify.main()
 
 
@@ -431,9 +431,9 @@ class TestSkipHeadings:
 
 
 class TestPathProtection:
-    PATHS = ["src/components/Button.tsx", "/home/samuel/main.py", "./build/out",
+    PATHS = ("src/components/Button.tsx", "/home/samuel/main.py", "./build/out",
              "../lib/util.js", "~/.config/app", "config.json", "example.com",
-             "Node.js", "www.example.com", "docs/api/v2/spec.md"]
+             "Node.js", "www.example.com", "docs/api/v2/spec.md")
 
     def test_paths_files_and_domains_are_protected(self):
         for token in self.PATHS:
