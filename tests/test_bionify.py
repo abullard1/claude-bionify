@@ -16,6 +16,8 @@ sys.path.insert(0, str(_SCRIPTS))
 import bionify  # noqa: E402
 import control  # noqa: E402
 import core  # noqa: E402
+import doctor  # noqa: E402
+import interpreters  # noqa: E402
 import overrides  # noqa: E402
 import settings  # noqa: E402
 
@@ -675,3 +677,194 @@ class TestHookFencingIntegration:
         self._emit(monkeypatch, capsys, index=0, delta="before\n```")
         self._emit(monkeypatch, capsys, index=1, final=True, delta="code()\n```\nafter")
         assert list(tmp_path.iterdir()) == []
+
+
+_PLUGIN = _SCRIPTS.parent
+_HOOKS = _PLUGIN / "hooks" / "hooks.json"
+
+
+class TestHookManifest:
+    """The hook's declared interpreters are a contract, and an unguarded one.
+
+    `claude plugin validate --strict` accepts unknown keys inside a hook entry and
+    never checks that `command` can be spawned, so nothing but these assertions
+    stands between a rename and issue #7 happening again.
+    """
+
+    @pytest.fixture
+    def hooks(self):
+        return json.loads(_HOOKS.read_text(encoding="utf-8"))
+
+    def test_declares_the_interpreters_windows_and_posix_need(self, hooks):
+        """python3 covers POSIX and Store Python; py covers python.org on Windows."""
+        declared = interpreters.declared(hooks)
+        assert [c.command for c in declared] == ["python3", "py"]
+        assert declared[1].args == ("-3",)
+
+    def test_every_entry_is_exec_form_running_the_hook_script(self, hooks):
+        entries = hooks["hooks"]["MessageDisplay"][0]["hooks"]
+        assert entries, "no MessageDisplay hook declared"
+        for entry in entries:
+            assert entry["type"] == "command"
+            assert isinstance(entry.get("args"), list), "shell form loses exec-form quoting"
+            assert entry["args"][-1] == "${CLAUDE_PLUGIN_ROOT}/scripts/bionify.py"
+            assert entry["timeout"] > 0
+
+    def test_no_entry_carries_an_if_condition(self, hooks):
+        """`if` is a tool-event matcher; on MessageDisplay it silently skips the hook."""
+        for entry in hooks["hooks"]["MessageDisplay"][0]["hooks"]:
+            assert "if" not in entry
+
+    def test_commands_offer_a_fallback_chain(self):
+        """The slash commands reach Python through a shell, so they can chain."""
+        for path in sorted((_PLUGIN / "commands").glob("*.md")):
+            body = path.read_text(encoding="utf-8")
+            assert "py -3 " in body, f"{path.name} has no py fallback"
+            assert "Bash(py *)" in body, f"{path.name} forbids the py fallback it uses"
+
+
+class TestInterpreterProbe:
+    def test_reads_a_candidate_out_of_a_hook_entry(self):
+        entry = {"command": "py", "args": ["-3", "/x/scripts/bionify.py"]}
+        assert interpreters.candidate_of(entry) == interpreters.Candidate("py", ("-3",))
+
+    def test_shell_form_entries_have_no_candidate(self):
+        assert interpreters.candidate_of({"command": "python3 /x/bionify.py"}) is None
+
+    def test_probing_the_running_interpreter_succeeds(self):
+        result = interpreters.probe(interpreters.Candidate(sys.executable))
+        assert result.usable
+        assert result.version[:2] == sys.version_info[:2]
+        assert result.executable
+
+    def test_missing_interpreter_is_reported_not_raised(self):
+        result = interpreters.probe(interpreters.Candidate("definitely-not-a-python-xyz"))
+        assert not result.usable
+        assert "not found" in result.detail
+
+    def test_store_placeholder_is_named_rather_than_called_an_exit_code(self):
+        """Windows' python3.exe stub spawns fine and exits without running Python."""
+        stub = (b"Python was not found; run without arguments to install from the "
+                b"Microsoft Store, or disable this shortcut from Settings.")
+        assert "Microsoft Store" in interpreters.explain_failure(9009, stub)
+
+    def test_an_ordinary_failure_reports_its_exit_code(self):
+        assert interpreters.explain_failure(2, b"boom") == "exited 2"
+
+    def test_version_below_the_floor_is_not_usable(self):
+        old = interpreters.Result(interpreters.Candidate("python3"), (3, 9), "/x", "")
+        assert not old.usable
+        assert "below the 3.10 minimum" in interpreters.describe(old)
+
+    def test_first_usable_skips_the_broken_candidates(self):
+        broken = interpreters.Result(interpreters.Candidate("python3"), None, "", "not found")
+        good = interpreters.Result(interpreters.Candidate("py", ("-3",)), (3, 12), "/x", "")
+        assert interpreters.first_usable([broken, good]) is good
+        assert interpreters.first_usable([broken]) is None
+
+
+class TestHookSpawnsUnderADeclaredInterpreter:
+    """Spawn the hook the way Claude Code does, by name, in exec form.
+
+    The rest of the suite runs bionify.py through `sys.executable`, which always
+    resolves. That is exactly the assumption issue #7 broke.
+    """
+
+    @staticmethod
+    def _spawn(command, args):
+        payload = json.dumps({"delta": "alpha bravo", "message_id": "m1",
+                              "index": 0, "final": True}).encode("utf-8")
+        script = str(_SCRIPTS / "bionify.py")
+        argv = [command, *args, script]
+        try:
+            return subprocess.run(argv, input=payload, capture_output=True, timeout=30)
+        except (OSError, subprocess.SubprocessError):
+            return None
+
+    def test_at_least_one_declared_interpreter_carries_the_hook(self):
+        hooks = json.loads(_HOOKS.read_text(encoding="utf-8"))
+        outputs = []
+        for candidate in interpreters.declared(hooks):
+            done = self._spawn(candidate.command, candidate.args)
+            if done is None or done.returncode != 0 or not done.stdout:
+                continue
+            outputs.append(json.loads(done.stdout)["hookSpecificOutput"]["displayContent"])
+        assert outputs, "no interpreter this plugin declares could run the hook"
+        assert all("**alp**ha" in text for text in outputs)
+
+    def test_declared_interpreters_agree(self):
+        """Where both exist, both transform each delta; disagreement would flicker."""
+        hooks = json.loads(_HOOKS.read_text(encoding="utf-8"))
+        results = [self._spawn(c.command, c.args) for c in interpreters.declared(hooks)]
+        ran = [d.stdout for d in results if d is not None and d.returncode == 0 and d.stdout]
+        if len(ran) < 2:
+            pytest.skip("only one declared interpreter is present on this machine")
+        assert len(set(ran)) == 1
+
+
+class TestDoctor:
+    @pytest.fixture(autouse=True)
+    def _plugin_data(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("CLAUDE_PLUGIN_DATA", str(tmp_path))
+
+    def test_reports_the_interpreters_and_a_verdict(self):
+        text = doctor.report()
+        assert "claude-bionify doctor" in text
+        assert "python3" in text and "py -3" in text
+        assert "verdict" in text
+
+    def test_verdict_is_ok_when_a_declared_interpreter_works(self):
+        good = interpreters.Result(
+            interpreters.Candidate("python3"), (3, 12), "/usr/bin/python3", "")
+        lines = doctor.verdict([good], str(_PLUGIN))
+        assert lines[0].startswith("verdict     OK")
+
+    def test_verdict_points_at_an_undeclared_interpreter_that_works(self):
+        """The conda and uv case: Python exists, but not under a declared name."""
+        broken = interpreters.Result(interpreters.Candidate("python3"), None, "", "not found")
+        other = interpreters.Result(interpreters.Candidate("python"), (3, 12), "/opt/py/python", "")
+        text = "\n".join(doctor.verdict([broken, other], str(_PLUGIN)))
+        assert "BROKEN" in text
+        assert "/opt/py/python" in text
+        assert "recheck" in text             # the version-scoped path warning
+
+    def test_verdict_says_so_when_no_python_works_at_all(self):
+        broken = interpreters.Result(interpreters.Candidate("python3"), None, "", "not found")
+        text = "\n".join(doctor.verdict([broken], str(_PLUGIN)))
+        assert "No Python 3.10+" in text
+
+    def test_manual_hook_snippet_is_valid_json_pointing_at_the_hook(self):
+        snippet = json.loads(doctor.manual_hook("/opt/py/python", "/plugins/cb"))
+        entry = snippet["hooks"]["MessageDisplay"][0]["hooks"][0]
+        assert entry["command"] == "/opt/py/python"
+        assert entry["args"][0].endswith(os.path.join("scripts", "bionify.py"))
+
+
+class TestStatusHealthWarning:
+    def test_status_warns_when_no_declared_interpreter_can_start(self, monkeypatch, capsys):
+        monkeypatch.setattr(interpreters, "survey", lambda root, extra=(): [
+            interpreters.Result(interpreters.Candidate("python3"), None, "", "not found")])
+        control.main(["status"])
+        out = capsys.readouterr().out
+        assert "WARNING" in out
+        assert "doctor" in out
+
+    def test_status_stays_a_single_line_when_the_hook_is_healthy(self, monkeypatch, capsys):
+        monkeypatch.setattr(interpreters, "survey", lambda root, extra=(): [
+            interpreters.Result(interpreters.Candidate("python3"), (3, 12), "/x", "")])
+        control.main(["status"])
+        assert capsys.readouterr().out.strip().count("\n") == 0
+
+    def test_other_verbs_do_not_pay_for_the_probe(self, monkeypatch, capsys):
+        def fail(*a, **k):
+            raise AssertionError("probe must not run for a plain toggle")
+        monkeypatch.setattr(interpreters, "survey", fail)
+        control.main(["on"])
+        assert "WARNING" not in capsys.readouterr().out
+
+    def test_a_broken_probe_never_breaks_the_command(self, monkeypatch, capsys):
+        def boom(*a, **k):
+            raise OSError("no /proc")
+        monkeypatch.setattr(interpreters, "survey", boom)
+        control.main(["status"])
+        assert "claude-bionify:" in capsys.readouterr().out

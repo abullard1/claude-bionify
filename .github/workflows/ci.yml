@@ -63,6 +63,14 @@ jobs:
           --cov=plugins/claude-bionify/scripts
           --cov-report=term-missing
           --cov-fail-under=80
+      # The runner is not a typical Windows box: setup-python puts a python3 on
+      # PATH that a user's python.org install would not have. This records what
+      # each declared interpreter actually does here, so a future change to the
+      # hook's interpreter list can be read against a known baseline rather than
+      # guessed at. Informational: the suite above is what gates.
+      - name: Report interpreter resolution
+        continue-on-error: true
+        run: python plugins/claude-bionify/scripts/doctor.py
 
   # ruff is interpreter-independent, so it runs once rather than per matrix cell.
   lint:

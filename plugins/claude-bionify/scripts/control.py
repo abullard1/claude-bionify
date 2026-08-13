@@ -14,10 +14,31 @@ parses the verb and prints a single status line, and always exits 0 so the slash
 command never errors.
 """
 
+import os
 import sys
 
+import interpreters
 import overrides
 import settings
+
+_PLUGIN_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def health_warning() -> str | None:
+    """Warn when this command runs but the hook's own interpreters do not.
+
+    The slash commands reach Python through a shell, which resolves names the
+    hook's exec-form spawn cannot. Without this, `status` reports ON on a machine
+    where nothing is being bolded.
+    """
+    try:
+        results = interpreters.survey(_PLUGIN_ROOT, extra=())
+        if interpreters.first_usable(results) is None:
+            return ("claude-bionify: WARNING nothing is being bolded, because no "
+                    "interpreter the hook declares can start. Run /claude-bionify:doctor")
+    except Exception:
+        return None
+    return None
 
 
 def _apply_set(state: dict, rest: list) -> tuple[dict, str]:
@@ -63,6 +84,10 @@ def main(argv: list) -> None:
         overrides.clear()
     else:
         overrides.save(new_state)
+    if argv and argv[0].lower() == "status":
+        warning = health_warning()
+        if warning:
+            message = f"{message}\n{warning}"
     # Output is read as UTF-8; print() would apply the locale encoding.
     sys.stdout.buffer.write(message.encode("utf-8") + b"\n")
 
