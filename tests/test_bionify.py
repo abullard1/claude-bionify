@@ -4,6 +4,7 @@ import io
 import json
 import os
 import pathlib
+import re
 import subprocess
 import sys
 
@@ -180,31 +181,49 @@ class TestFenceState:
         return tmp_path
 
     def test_roundtrip(self, data_dir):
-        bionify.write_fence_state("msg-1", True, final=False)
+        bionify.write_fence_state("msg-1", True)
         assert bionify.read_fence_state("msg-1", index=1) is True
-        bionify.write_fence_state("msg-1", False, final=False)
+        bionify.write_fence_state("msg-1", False)
         assert bionify.read_fence_state("msg-1", index=1) is False
 
     def test_first_delta_starts_fresh(self, data_dir):
-        bionify.write_fence_state("msg-1", True, final=False)
+        bionify.write_fence_state("msg-1", True)
         assert bionify.read_fence_state("msg-1", index=0) is False
 
-    def test_final_clears_state(self, data_dir):
-        bionify.write_fence_state("msg-1", True, final=False)
-        bionify.write_fence_state("msg-1", True, final=True)
+    def test_clear_removes_state(self, data_dir):
+        bionify.write_fence_state("msg-1", True)
+        bionify.clear_fence_state("msg-1")
         assert bionify.read_fence_state("msg-1", index=1) is False
         assert list(data_dir.iterdir()) == []
 
+    def test_write_leaves_no_temporary_file(self, data_dir):
+        bionify.write_fence_state("msg-1", True)
+        assert sorted(p.name for p in data_dir.iterdir()) == ["fence-msg-1.state"]
+
     def test_sweep_removes_orphans_but_keeps_current(self, data_dir):
-        bionify.write_fence_state("old-1", True, final=False)
-        bionify.write_fence_state("old-2", True, final=False)
-        bionify.write_fence_state("current", True, final=False)
+        bionify.write_fence_state("old-1", True)
+        bionify.write_fence_state("old-2", True)
+        bionify.write_fence_state("current", True)
         bionify.sweep_stale_state("current")
         assert sorted(p.name for p in data_dir.iterdir()) == ["fence-current.state"]
 
+    def test_sweep_collects_orphaned_temporary_files(self, data_dir):
+        """A killed process can leave the tmp half of an atomic write behind."""
+        (data_dir / "fence-old.state.tmp-999").write_text("1", encoding="utf-8")
+        bionify.write_fence_state("current", True)
+        bionify.sweep_stale_state("current")
+        assert sorted(p.name for p in data_dir.iterdir()) == ["fence-current.state"]
+
+    def test_sweep_spares_the_current_messages_temporary_file(self, data_dir):
+        """A concurrent flush of the same message may be mid-write during the sweep."""
+        (data_dir / "fence-current.state.tmp-999").write_text("1", encoding="utf-8")
+        bionify.sweep_stale_state("current")
+        assert [p.name for p in data_dir.iterdir()] == ["fence-current.state.tmp-999"]
+
     def test_operations_are_safe_without_data_dir(self, monkeypatch):
         monkeypatch.delenv("CLAUDE_PLUGIN_DATA", raising=False)
-        bionify.write_fence_state("msg", True, final=False)
+        bionify.write_fence_state("msg", True)
+        bionify.clear_fence_state("msg")
         assert bionify.read_fence_state("msg", index=1) is False
         bionify.sweep_stale_state("msg")  # must not raise
 
@@ -520,6 +539,19 @@ class TestManifestConsistency:
         assert user_config["fixation"]["max"] == settings.clamp_fixation(1.0)
         assert user_config["min_word_length"]["min"] == settings.clamp_min_length(0)
 
+    @pytest.mark.parametrize("readme", [
+        _SCRIPTS.parent / "README.md",           # plugin README
+        _SCRIPTS.parent.parent.parent / "README.md",   # repo README
+    ])
+    def test_readme_version_badges_match_the_manifest(self, readme):
+        """Both badges drifted behind the manifest before this test existed."""
+        manifest = json.loads(
+            (_SCRIPTS.parent / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
+        badges = re.findall(r"badge/version-([\d.]+?)-",
+                            readme.read_text(encoding="utf-8"))
+        assert badges, f"no version badge found in {readme}"
+        assert set(badges) == {manifest["version"]}
+
 
 class TestSubprocessStdio:
     """Drive the scripts as Claude Code does: child processes reading a pipe.
@@ -558,26 +590,88 @@ class TestSubprocessStdio:
         assert "\u00b7" in out.decode("utf-8")
 
 
+def display_event(**overrides):
+    """A MessageDisplay payload shaped like the one Claude Code puts on the wire.
+
+    The base fields accompany every hook event, so tests that omit them can pass
+    while the real payload takes a different path through `parse_event`.
+    """
+    return {
+        "session_id": "sess-1",
+        "transcript_path": "/tmp/transcript.jsonl",
+        "cwd": "/tmp",
+        "hook_event_name": "MessageDisplay",
+        "turn_id": "turn-1",
+        "message_id": "m1",
+        "index": 0,
+        "final": False,
+        "delta": "",
+        **overrides,
+    }
+
+
+class TestParseEvent:
+    """The message id keys the fence state, so the wire field must be read exactly."""
+
+    def test_reads_message_id(self):
+        event = bionify.parse_event(display_event(message_id="m1"))
+        assert event.message_id == "m1"
+
+    def test_falls_back_to_camel_case_for_older_builds(self):
+        raw = display_event(messageId="m-camel")
+        del raw["message_id"]
+        assert bionify.parse_event(raw).message_id == "m-camel"
+
+    def test_falls_back_to_session_id(self):
+        raw = display_event()
+        del raw["message_id"]
+        assert bionify.parse_event(raw).message_id == "sess-1"
+
+    def test_message_id_wins_over_the_fallbacks(self):
+        raw = display_event(message_id="m1", messageId="m-camel")
+        assert bionify.parse_event(raw).message_id == "m1"
+
+    def test_key_is_empty_when_nothing_identifies_the_message(self):
+        assert bionify.parse_event({}).message_id == ""
+
+
 class TestHookFencingIntegration:
     """Drive main() across streamed deltas the way Claude Code does, to prove a
-    code block that spans deltas stays verbatim. Claude Code sends the message id
-    as `messageId`, so the fence-state key must be derived from that.
+    code block that spans deltas stays verbatim and leaves no state behind.
     """
 
-    def _emit(self, monkeypatch, capsys, event):
-        monkeypatch.setattr("sys.stdin", hook_stdin(json.dumps(event)))
+    def _emit(self, monkeypatch, capsys, **overrides):
+        payload = json.dumps(display_event(**overrides))
+        monkeypatch.setattr("sys.stdin", hook_stdin(payload))
         bionify.main()
         return capsys.readouterr().out
 
     def test_code_fence_carries_across_deltas(self, tmp_path, monkeypatch, capsys):
         monkeypatch.setenv("CLAUDE_PLUGIN_DATA", str(tmp_path))
-        self._emit(monkeypatch, capsys,
-                   {"messageId": "m1", "index": 0, "final": False,
-                    "delta": "before\n```"})
-        out = self._emit(monkeypatch, capsys,
-                         {"messageId": "m1", "index": 1, "final": True,
-                          "delta": "code_here()\n```\nafter"})
+        self._emit(monkeypatch, capsys, index=0, delta="before\n```")
+        out = self._emit(monkeypatch, capsys, index=1, final=True,
+                         delta="code_here()\n```\nafter")
         content = json.loads(out)["hookSpecificOutput"]["displayContent"]
         assert "code_here()" in content      # code body left verbatim
         assert "**code**" not in content     # not bolded as if it were prose
         assert "**aft**er" in content        # prose after the closed fence is bolded
+
+    def test_state_is_keyed_by_message_not_session(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.setenv("CLAUDE_PLUGIN_DATA", str(tmp_path))
+        self._emit(monkeypatch, capsys, message_id="m1", index=0, delta="before\n```")
+        assert [p.name for p in tmp_path.iterdir()] == ["fence-m1.state"]
+
+    def test_empty_final_delta_clears_state(self, tmp_path, monkeypatch, capsys):
+        """A message ending on a newline flushes one last time with no text."""
+        monkeypatch.setenv("CLAUDE_PLUGIN_DATA", str(tmp_path))
+        self._emit(monkeypatch, capsys, index=0, delta="before\n```\n")
+        assert list(tmp_path.iterdir())          # state exists mid-message
+        out = self._emit(monkeypatch, capsys, index=1, final=True, delta="")
+        assert out == ""                         # nothing to display
+        assert list(tmp_path.iterdir()) == []    # and nothing left behind
+
+    def test_final_delta_with_text_clears_state(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.setenv("CLAUDE_PLUGIN_DATA", str(tmp_path))
+        self._emit(monkeypatch, capsys, index=0, delta="before\n```")
+        self._emit(monkeypatch, capsys, index=1, final=True, delta="code()\n```\nafter")
+        assert list(tmp_path.iterdir()) == []

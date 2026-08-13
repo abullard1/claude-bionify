@@ -3,6 +3,23 @@
 All notable changes to claude-bionify are documented here. This project follows
 [semantic versioning](https://semver.org) and [Keep a Changelog](https://keepachangelog.com).
 
+## [1.0.4] - 2026-08-13
+
+### Fixed
+- Code blocks are less likely to be bolded as prose when Claude streams quickly.
+  Claude Code runs up to three flushes of one message at once, and the file that
+  remembers whether a code fence is open was truncated before being rewritten, so
+  an overlapping flush could read it as empty. It is now written to a temporary
+  file and moved into place, which no reader can observe half-finished.
+- The hook reads the message identifier from `message_id`, the field Claude Code
+  actually sends. It looked for `messageId`, never found it, and fell back to the
+  session id, which keyed fence state per session rather than per message.
+- Fence state is cleared when a message ends on a newline. That final flush
+  carries no text, and the hook returned before reaching its own cleanup, leaving
+  a stale file behind for the rest of the session.
+- Stale temporary files from an interrupted flush are collected alongside stale
+  fence state at the start of the next message.
+
 ## [1.0.3] - 2026-07-26
 
 ### Fixed
