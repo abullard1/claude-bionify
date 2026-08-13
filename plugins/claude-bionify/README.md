@@ -10,7 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-d97757)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.0.4-success)
+![Version](https://img.shields.io/badge/version-1.0.5-success)
 
 </div>
 
@@ -51,7 +51,7 @@ Change claude-bionify mid-session without a reload. The next reply reflects it i
 
 - `/claude-bionify:toggle` · `/claude-bionify:on` · `/claude-bionify:off`
 - `/claude-bionify:set strength 0.7` · `/claude-bionify:set boundary syllable` · `/claude-bionify:set minlen 5` · `/claude-bionify:set acronyms off` · `/claude-bionify:set urls off` · `/claude-bionify:set headings off`
-- `/claude-bionify:status` · `/claude-bionify:reset`
+- `/claude-bionify:status` · `/claude-bionify:reset` · `/claude-bionify:doctor`
 
 ## Themes
 
@@ -81,7 +81,15 @@ falls back to the original.
 
 ## Requirements
 
-- Claude Code with plugin support · `python3` on your `PATH` · a terminal that renders markdown bold
+- Claude Code 2.1.152+ (which added the `MessageDisplay` hook) · Python 3.10+ · a terminal that
+  renders markdown bold
+
+The hook starts Python as `python3`, and on Windows also through the `py` launcher, because the
+python.org installer ships no `python3.exe` and Windows' own Microsoft Store placeholder of that
+name exits without running Python. If neither name resolves (conda, uv, or pyenv-win installs),
+run `/claude-bionify:doctor`: it tests each interpreter by running it and prints a ready-made
+configuration snippet for one that works. A hook that cannot start is silent by design, so the
+doctor is the way to tell that apart from the plugin being off.
 
 ## Terminal compatibility
 

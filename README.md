@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-d97757)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.0.4-success)
+![Version](https://img.shields.io/badge/version-1.0.5-success)
 [![CI](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml/badge.svg)](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/samuelbullard)
 
@@ -80,6 +80,7 @@ Change claude-bionify mid-session without a reload or any config editing. The ne
 | `/claude-bionify:set minlen 5` · `/claude-bionify:set acronyms off` · `/claude-bionify:set urls off` · `/claude-bionify:set headings off` | Tweak the other settings |
 | `/claude-bionify:status` | Show the active overrides |
 | `/claude-bionify:reset` | Clear overrides, back to your configured defaults |
+| `/claude-bionify:doctor` | Diagnose why nothing is being bolded |
 
 These write a small override file that the hook reads on every message, so changes take effect immediately and persist until you `reset`.
 
@@ -130,9 +131,17 @@ screen — so only what you see changes, never the text itself.
 
 ## Requirements
 
-- Claude Code with plugin support
-- `python3` on your `PATH`
+- Claude Code 2.1.152 or newer (the release that added the `MessageDisplay` hook)
+- Python 3.10+, reachable as `python3` or through the `py` launcher (see below)
 - A terminal that renders markdown bold (any modern terminal)
+
+On macOS, Linux, and WSL, `python3` is what the hook uses. On native Windows it is not that
+simple: the python.org installer creates `python.exe` and `py.exe` but no `python3.exe`, and
+Windows itself ships a Microsoft Store placeholder named `python3.exe` that starts and exits
+without running Python. The hook therefore also launches through the `py` launcher, which every
+python.org install provides. If your Windows Python came from conda, uv, or pyenv-win, neither
+name may resolve; run `/claude-bionify:doctor`, which tests each interpreter by running it and
+prints a ready-made configuration snippet when it finds one the plugin does not know about.
 
 ## Limitations
 
@@ -144,6 +153,9 @@ screen — so only what you see changes, never the text itself.
   to a length-based bold.
 - Each line is processed on its own, so a markdown construct split across a line break
   (rare) may not be detected.
+- If the hook cannot start, Claude Code shows the original text and reports no error, because
+  `MessageDisplay` failures are display-only. `/claude-bionify:doctor` is the way to see it, and
+  `claude --debug` logs the underlying spawn error.
 
 ## Development
 
@@ -177,7 +189,9 @@ claude-bionify/
 │   ├── scripts/
 │   │   ├── core.py           # functional core: pure formatting + settings (no I/O)
 │   │   ├── overrides.py      # runtime-override persistence (shared contract)
+│   │   ├── interpreters.py   # which Python the hook can actually start
 │   │   ├── bionify.py        # the MessageDisplay hook shell (entrypoint)
+│   │   ├── doctor.py         # the /claude-bionify:doctor report
 │   │   └── control.py        # the /claude-bionify control CLI
 │   ├── themes/               # 7 color themes for /theme (experimental component)
 │   └── README.md

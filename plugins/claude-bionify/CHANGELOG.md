@@ -3,6 +3,35 @@
 All notable changes to claude-bionify are documented here. This project follows
 [semantic versioning](https://semver.org) and [Keep a Changelog](https://keepachangelog.com).
 
+## [1.0.5] - 2026-08-13
+
+### Fixed
+- The hook now starts on native Windows. It was declared to run as `python3`, which the
+  python.org installer never creates, while Windows ships a Microsoft Store placeholder of
+  that name that starts and exits without running Python. Claude Code spawns exec-form hooks
+  with no shell, so neither case could fall back, and a failed `MessageDisplay` hook shows the
+  original text without reporting an error: the plugin was silently inert. It is now declared
+  twice, as `python3` and as `py -3`, and the first one that starts does the bolding.
+  Reported by @aermak.
+- `/claude-bionify:status` no longer reports ON while nothing is being bolded. The slash
+  commands reach Python through a shell, which resolves names the hook's own spawn cannot, so
+  status could describe a hook that was never running. It now appends a warning when no
+  declared interpreter can start.
+- The slash commands fall back through `py -3` and `python`, so they keep working where only
+  one of the three names resolves.
+
+### Added
+- `/claude-bionify:doctor` reports whether the hook can start and why not. It tests each
+  interpreter by running it, rather than looking it up on `PATH`, because the Store placeholder
+  passes a PATH check. When it finds a working interpreter the plugin does not declare, such as
+  a conda or uv install, it prints a ready-made settings snippet, with the caveat that the path
+  is version-scoped and needs updating after an upgrade. It never edits configuration itself.
+
+### Notes
+- Where both `python3` and `py` resolve, both run the transform on every flush. That is safe
+  because 1.0.4 made the fence-state write atomic; reverting that change would corrupt state on
+  those machines only. A test pins the two interpreters to identical output.
+
 ## [1.0.4] - 2026-08-13
 
 ### Fixed
