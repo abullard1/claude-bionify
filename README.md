@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-d97757)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.0.4-success)
+![Version](https://img.shields.io/badge/version-1.0.5-success)
 [![CI](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml/badge.svg)](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/samuelbullard)
 
@@ -130,9 +130,21 @@ screen — so only what you see changes, never the text itself.
 
 ## Requirements
 
-- Claude Code with plugin support
-- `python3` on your `PATH`
+- Claude Code 2.1.152 or newer (the release that added the `MessageDisplay` hook)
+- Python 3.10+, reachable as `python3` or through the `py` launcher (see below)
 - A terminal that renders markdown bold (any modern terminal)
+
+On macOS, Linux, and WSL the hook runs as `python3`. Native Windows is different: the
+python.org installer creates `python.exe` and `py.exe` but no `python3.exe`, and Windows ships
+a Microsoft Store placeholder named `python3.exe` that exits without running Python. The hook
+therefore also launches through the `py` launcher.
+
+Two consequences there. Bolding works, but the `/claude-bionify:*` commands do not, because
+they run through a shell where no fallback syntax suits both Git Bash and PowerShell;
+installing Git for Windows, or a real `python3` on `PATH`, brings them back. And if your
+Python came from conda, uv, or pyenv-win, neither name may resolve, so point the hook at your
+interpreter with a `MessageDisplay` entry in `~/.claude/settings.json` whose `command` is the
+absolute path to your `python.exe`.
 
 ## Limitations
 
@@ -144,6 +156,8 @@ screen — so only what you see changes, never the text itself.
   to a length-based bold.
 - Each line is processed on its own, so a markdown construct split across a line break
   (rare) may not be detected.
+- If the hook cannot start, Claude Code shows the original text and reports no error, because
+  `MessageDisplay` failures are display-only. `claude --debug` logs the underlying spawn error.
 
 ## Development
 
@@ -177,6 +191,7 @@ claude-bionify/
 │   ├── scripts/
 │   │   ├── core.py           # functional core: pure formatting + settings (no I/O)
 │   │   ├── overrides.py      # runtime-override persistence (shared contract)
+│   │   ├── interpreters.py   # whether the hook's interpreters can actually start
 │   │   ├── bionify.py        # the MessageDisplay hook shell (entrypoint)
 │   │   └── control.py        # the /claude-bionify control CLI
 │   ├── themes/               # 7 color themes for /theme (experimental component)
