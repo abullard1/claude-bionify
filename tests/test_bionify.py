@@ -16,6 +16,7 @@ sys.path.insert(0, str(_SCRIPTS))
 import bionify  # noqa: E402
 import control  # noqa: E402
 import core  # noqa: E402
+import interpreters  # noqa: E402
 import overrides  # noqa: E402
 import settings  # noqa: E402
 
@@ -675,3 +676,142 @@ class TestHookFencingIntegration:
         self._emit(monkeypatch, capsys, index=0, delta="before\n```")
         self._emit(monkeypatch, capsys, index=1, final=True, delta="code()\n```\nafter")
         assert list(tmp_path.iterdir()) == []
+
+
+_PLUGIN = _SCRIPTS.parent
+_HOOKS = _PLUGIN / "hooks" / "hooks.json"
+
+
+class TestHookManifest:
+    """`claude plugin validate --strict` checks none of this, so these do."""
+
+    @pytest.fixture
+    def hooks(self):
+        return json.loads(_HOOKS.read_text(encoding="utf-8"))
+
+    def test_declares_the_interpreters_windows_and_posix_need(self, hooks):
+        """python3 covers POSIX and Store Python; py covers python.org on Windows."""
+        declared = interpreters.declared(hooks)
+        assert [c.command for c in declared] == ["python3", "py"]
+        assert declared[1].args == ("-3",)
+
+    def test_every_entry_is_exec_form_running_the_hook_script(self, hooks):
+        entries = hooks["hooks"]["MessageDisplay"][0]["hooks"]
+        assert entries, "no MessageDisplay hook declared"
+        for entry in entries:
+            assert entry["type"] == "command"
+            assert isinstance(entry.get("args"), list), "shell form loses exec-form quoting"
+            assert entry["args"][-1] == "${CLAUDE_PLUGIN_ROOT}/scripts/bionify.py"
+            assert entry["timeout"] > 0
+
+    def test_no_entry_carries_an_if_condition(self, hooks):
+        """`if` is a tool-event matcher; on MessageDisplay it silently skips the hook."""
+        for entry in hooks["hooks"]["MessageDisplay"][0]["hooks"]:
+            assert "if" not in entry
+
+    def test_commands_use_no_shell_operators(self):
+        """Shell form falls back to PowerShell 5.1, where `||` is a parse error."""
+        for path in sorted((_PLUGIN / "commands").glob("*.md")):
+            body = path.read_text(encoding="utf-8")
+            assert "||" not in body, f"{path.name} uses a shell operator PowerShell 5.1 rejects"
+            assert "&&" not in body, f"{path.name} uses a shell operator PowerShell 5.1 rejects"
+
+
+class TestInterpreterProbe:
+    """Availability is decided by running a candidate, never by locating it."""
+
+    def test_reads_a_candidate_out_of_a_hook_entry(self):
+        entry = {"command": "py", "args": ["-3", "/x/scripts/bionify.py"]}
+        assert interpreters.candidate_of(entry) == interpreters.Candidate("py", ("-3",))
+
+    def test_shell_form_entries_have_no_candidate(self):
+        assert interpreters.candidate_of({"command": "python3 /x/bionify.py"}) is None
+
+    def test_the_running_interpreter_starts(self):
+        assert interpreters.starts(interpreters.Candidate(sys.executable))
+
+    def test_a_missing_interpreter_is_reported_not_raised(self):
+        assert not interpreters.starts(interpreters.Candidate("definitely-not-a-python-xyz"))
+
+    def test_an_interpreter_that_exits_nonzero_does_not_count(self):
+        """The Windows Store placeholder spawns fine and exits 9009 without running Python."""
+        assert not interpreters.starts(
+            interpreters.Candidate(sys.executable, ("-c", "import sys; sys.exit(9009)")))
+
+    def test_a_version_below_the_floor_does_not_count(self):
+        assert interpreters.parse_version(b"3 9") < interpreters.MINIMUM
+        assert interpreters.parse_version(b"3 12") >= interpreters.MINIMUM
+
+    def test_unreadable_probe_output_is_not_a_version(self):
+        assert interpreters.parse_version(b"") is None
+        assert interpreters.parse_version(b"Python was not found") is None
+
+    def test_the_beside_prober_check_is_windows_only(self):
+        """Windows searches the caller's own directory before PATH; POSIX does not."""
+        if os.name == "nt":
+            pytest.skip("POSIX execvp searches PATH only; this guard is for Windows")
+        assert interpreters.found_only_beside_prober("python") is False
+
+
+
+class TestHookSpawnsUnderADeclaredInterpreter:
+    """Spawn by name in exec form, as Claude Code does, not via sys.executable."""
+
+    @staticmethod
+    def _spawn(command, args):
+        payload = json.dumps({"delta": "alpha bravo", "message_id": "m1",
+                              "index": 0, "final": True}).encode("utf-8")
+        script = str(_SCRIPTS / "bionify.py")
+        argv = [command, *args, script]
+        try:
+            return subprocess.run(argv, input=payload, capture_output=True, timeout=30)
+        except (OSError, subprocess.SubprocessError):
+            return None
+
+    def test_at_least_one_declared_interpreter_carries_the_hook(self):
+        hooks = json.loads(_HOOKS.read_text(encoding="utf-8"))
+        outputs = []
+        for candidate in interpreters.declared(hooks):
+            done = self._spawn(candidate.command, candidate.args)
+            if done is None or done.returncode != 0 or not done.stdout:
+                continue
+            outputs.append(json.loads(done.stdout)["hookSpecificOutput"]["displayContent"])
+        assert outputs, "no interpreter this plugin declares could run the hook"
+        assert all("**alp**ha" in text for text in outputs)
+
+    def test_declared_interpreters_agree(self):
+        """Where both exist, both transform each delta; disagreement would flicker."""
+        hooks = json.loads(_HOOKS.read_text(encoding="utf-8"))
+        results = [self._spawn(c.command, c.args) for c in interpreters.declared(hooks)]
+        ran = [d.stdout for d in results if d is not None and d.returncode == 0 and d.stdout]
+        if len(ran) < 2:
+            pytest.skip("only one declared interpreter is present on this machine")
+        assert len(set(ran)) == 1
+
+
+class TestStatusHealthWarning:
+    def test_status_warns_when_no_declared_interpreter_can_start(self, monkeypatch, capsys):
+        monkeypatch.setattr(interpreters, "any_usable", lambda root, timeout=None: False)
+        control.main(["status"])
+        out = capsys.readouterr().out
+        assert "WARNING" in out
+        assert "nothing is being bolded" in out
+
+    def test_status_stays_a_single_line_when_the_hook_is_healthy(self, monkeypatch, capsys):
+        monkeypatch.setattr(interpreters, "any_usable", lambda root, timeout=None: True)
+        control.main(["status"])
+        assert capsys.readouterr().out.strip().count("\n") == 0
+
+    def test_other_verbs_do_not_pay_for_the_probe(self, monkeypatch, capsys):
+        def fail(*a, **k):
+            raise AssertionError("probe must not run for a plain toggle")
+        monkeypatch.setattr(interpreters, "any_usable", fail)
+        control.main(["on"])
+        assert "WARNING" not in capsys.readouterr().out
+
+    def test_a_broken_probe_never_breaks_the_command(self, monkeypatch, capsys):
+        def boom(*a, **k):
+            raise OSError("no /proc")
+        monkeypatch.setattr(interpreters, "any_usable", boom)
+        control.main(["status"])
+        assert "claude-bionify:" in capsys.readouterr().out
