@@ -3,6 +3,22 @@
 All notable changes to claude-bionify are documented here. This project follows
 [semantic versioning](https://semver.org) and [Keep a Changelog](https://keepachangelog.com).
 
+## [1.0.5] - 2026-08-15
+
+### Fixed
+- The hook now starts on native Windows. It ran as `python3`, a name that is usually not
+  Python there: the python.org installer creates no `python3.exe`, and Windows ships a
+  Microsoft Store placeholder of that name which exits without running anything. Hooks are
+  spawned with no shell, so there was no fallback, and a failed `MessageDisplay` hook shows
+  the original text without reporting an error. The hook is now declared as both `python3`
+  and `py -3`, and the first that starts does the bolding. Thanks to @aermak for the report.
+- `/claude-bionify:status` no longer reports ON while nothing is being bolded.
+
+### Known limitation
+- Where `python3` is the Store placeholder, bolding works but the `/claude-bionify:*`
+  commands do not, since they run through a shell and no fallback syntax suits both Git Bash
+  and PowerShell 5.1. Installing Git for Windows, or a real `python3` on `PATH`, restores them.
+
 ## [1.0.4] - 2026-08-13
 
 ### Fixed
