@@ -28,25 +28,49 @@ class Candidate(NamedTuple):
 def candidate_of(hook: dict) -> Candidate | None:
     """The interpreter one hooks.json entry launches, flags included."""
     command = hook.get("command")
-    if not command or not isinstance(hook.get("args"), list):
+    if not isinstance(command, str) or not command:
+        return None
+    if not isinstance(hook.get("args"), list):
         return None
     flags = tuple(str(a) for a in hook["args"] if not str(a).endswith(".py"))
-    return Candidate(str(command), flags)
+    return Candidate(command, flags)
+
+
+def _entries(hooks_json: dict) -> list[dict]:
+    """The MessageDisplay hook entries, ignoring anything oddly shaped.
+
+    A malformed file yields no entries rather than an exception, so it cannot
+    take a slash command down with it.
+    """
+    if not isinstance(hooks_json, dict) or not isinstance(hooks_json.get("hooks"), dict):
+        return []
+    groups = hooks_json["hooks"].get("MessageDisplay")
+    if not isinstance(groups, list):
+        return []
+    return [hook
+            for group in groups if isinstance(group, dict)
+            and isinstance(group.get("hooks"), list)
+            for hook in group["hooks"] if isinstance(hook, dict)]
 
 
 def declared(hooks_json: dict) -> tuple[Candidate, ...]:
     """Every interpreter the MessageDisplay hook declares, in order."""
     found = []
-    for group in hooks_json.get("hooks", {}).get("MessageDisplay", []):
-        for hook in group.get("hooks", []):
-            candidate = candidate_of(hook)
-            if candidate is not None and candidate not in found:
-                found.append(candidate)
+    for hook in _entries(hooks_json):
+        candidate = candidate_of(hook)
+        if candidate is not None and candidate not in found:
+            found.append(candidate)
     return tuple(found)
 
 
 def parse_version(raw: bytes) -> tuple[int, int] | None:
-    parts = raw.decode("utf-8", "replace").split()
+    """Read `(major, minor)` from the last line the probe printed.
+
+    Only the last line counts: a sitecustomize or a conda banner can print ahead
+    of it, and reading the whole stream would call a healthy interpreter dead.
+    """
+    lines = raw.decode("utf-8", "replace").strip().splitlines()
+    parts = lines[-1].split() if lines else []
     try:
         return int(parts[0]), int(parts[1])
     except (IndexError, ValueError):

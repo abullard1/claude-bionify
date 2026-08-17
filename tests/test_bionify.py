@@ -742,6 +742,18 @@ class TestInterpreterProbe:
         assert interpreters.parse_version(b"3 9") < interpreters.MINIMUM
         assert interpreters.parse_version(b"3 12") >= interpreters.MINIMUM
 
+    def test_a_banner_before_the_version_does_not_hide_it(self):
+        """A sitecustomize or conda banner prints ahead of the probe's own line."""
+        assert interpreters.parse_version(b"conda banner\n3 13") == (3, 13)
+        assert interpreters.parse_version(b"warning: locale failed\n3 12") == (3, 12)
+        assert interpreters.parse_version(b"a\nb\n3 10") == (3, 10)
+
+    def test_a_chatty_but_healthy_interpreter_counts_as_working(self):
+        chatty = interpreters.Candidate(
+            sys.executable,
+            ("-c", "import sys; print('banner'); print(*sys.version_info[:2])", "--"))
+        assert interpreters.starts(chatty)
+
     def test_unreadable_probe_output_is_not_a_version(self):
         assert interpreters.parse_version(b"") is None
         assert interpreters.parse_version(b"Python was not found") is None
@@ -752,6 +764,27 @@ class TestInterpreterProbe:
             pytest.skip("POSIX execvp searches PATH only; this guard is for Windows")
         assert interpreters.found_only_beside_prober("python") is False
 
+
+
+class TestMalformedHookConfig:
+    """A bad hooks.json must yield no candidates, never an exception."""
+
+    @pytest.mark.parametrize("shape", [
+        [],                                              # top level is a list
+        {"hooks": []},                                   # hooks is not a mapping
+        {"hooks": {"MessageDisplay": "nope"}},           # groups is not a list
+        {"hooks": {"MessageDisplay": ["nope"]}},         # group is not a mapping
+        {"hooks": {"MessageDisplay": [{"hooks": "no"}]}},        # entries not a list
+        {"hooks": {"MessageDisplay": [{"hooks": ["no"]}]}},      # entry not a mapping
+        {"hooks": {"MessageDisplay": [{"hooks": [{"command": ["x"], "args": []}]}]}},
+        {},
+    ])
+    def test_odd_shapes_yield_no_candidates(self, shape):
+        assert interpreters.declared(shape) == ()
+
+    def test_a_well_formed_file_still_parses(self):
+        hooks = json.loads(_HOOKS.read_text(encoding="utf-8"))
+        assert [c.command for c in interpreters.declared(hooks)] == ["python3", "py"]
 
 
 class TestHookSpawnsUnderADeclaredInterpreter:
@@ -808,6 +841,15 @@ class TestStatusHealthWarning:
         monkeypatch.setattr(interpreters, "any_usable", fail)
         control.main(["on"])
         assert "WARNING" not in capsys.readouterr().out
+
+    def test_an_unreadable_config_warns_instead_of_staying_silent(self, monkeypatch, capsys):
+        def missing(*a, **k):
+            raise FileNotFoundError("hooks.json")
+        monkeypatch.setattr(interpreters, "any_usable", missing)
+        control.main(["status"])
+        out = capsys.readouterr().out
+        assert "WARNING" in out
+        assert "could not be read" in out
 
     def test_a_broken_probe_never_breaks_the_command(self, monkeypatch, capsys):
         def boom(*a, **k):
