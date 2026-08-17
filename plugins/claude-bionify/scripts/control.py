@@ -33,11 +33,16 @@ def health_warning() -> str | None:
     `status` reports ON on a machine where nothing is being bolded.
     """
     try:
-        if not interpreters.any_usable(_PLUGIN_ROOT, timeout=_PROBE_TIMEOUT):
-            return ("claude-bionify: WARNING nothing is being bolded, because no "
-                    "interpreter the hook declares could be started")
+        healthy = interpreters.any_usable(_PLUGIN_ROOT, timeout=_PROBE_TIMEOUT)
+    except (OSError, ValueError):
+        # Unreadable hooks.json means nothing is bolding either, and saying so
+        # beats the silence that hid this class of failure in the first place.
+        return "claude-bionify: WARNING the hook configuration could not be read"
     except Exception:
         return None
+    if not healthy:
+        return ("claude-bionify: WARNING nothing is being bolded, because no "
+                "interpreter the hook declares could be started")
     return None
 
 
