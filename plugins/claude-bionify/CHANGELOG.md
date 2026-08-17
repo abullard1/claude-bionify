@@ -3,6 +3,17 @@
 All notable changes to claude-bionify are documented here. This project follows
 [semantic versioning](https://semver.org) and [Keep a Changelog](https://keepachangelog.com).
 
+## [1.0.6] - 2026-08-17
+
+### Fixed
+- `/claude-bionify:status` no longer reports that nothing is being bolded when it is. The
+  check read the interpreter's entire output, so a banner printed ahead of it by a
+  `sitecustomize` or a conda activation hid the version line and a perfectly good Python was
+  counted as unusable. It now reads the last line the probe prints.
+- A malformed `hooks.json` no longer leaves `/claude-bionify:status` silent. An unreadable
+  file now says so, and an oddly shaped one is treated as declaring no interpreters rather
+  than raising.
+
 ## [1.0.5] - 2026-08-15
 
 ### Fixed
