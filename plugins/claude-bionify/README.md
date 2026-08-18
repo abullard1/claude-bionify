@@ -101,6 +101,12 @@ the front.
 That is a terminal bug, not a claude-bionify or Claude Code issue. A future release may add an
 optional Unicode-glyph bold mode that avoids ANSI entirely and sidesteps it.
 
+Windows Terminal can also hide bold without breaking it. Its per-profile *Bold text style*
+setting (`intenseTextStyle`) on `bright` shifts the foreground colour instead of changing the
+font, which in schemes where the normal and bright variants are close looks like no bolding at
+all. `all` renders the bold font as well. To tell this apart from a broken hook, ask Claude to
+write a plain `**word**` in a reply: if that is not bold either, the terminal is the problem.
+
 For the full write-up, demo, and development guide, see the
 [project README](https://github.com/abullard1/claude-bionify#readme).
 

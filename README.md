@@ -146,6 +146,13 @@ Python came from conda, uv, or pyenv-win, neither name may resolve, so point the
 interpreter with a `MessageDisplay` entry in `~/.claude/settings.json` whose `command` is the
 absolute path to your `python.exe`.
 
+If nothing looks bold but `/claude-bionify:status` reports ON, check the terminal before the
+plugin: ask Claude to write a plain `**word**` in a reply. If that is not bold either, the hook
+is not the problem. Windows Terminal has a per-profile *Bold text style* setting
+(`intenseTextStyle` in its `settings.json`) which on `bright` only shifts the foreground colour,
+invisible in schemes where the normal and bright variants are close. `all` renders the bold font
+as well.
+
 ## Limitations
 
 - Affects **assistant chat text only**, not tool results or your prompts.
