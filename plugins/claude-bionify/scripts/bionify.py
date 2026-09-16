@@ -46,8 +46,20 @@ def load_config() -> settings.Style | None:
     return settings.build_style(raw)
 
 
-def _fence_dir() -> str | None:
-    return os.environ.get("CLAUDE_PLUGIN_DATA")
+def _fence_dir() -> str:
+    """Directory that holds the per-message fence-state files.
+
+    Claude Code normally sets CLAUDE_PLUGIN_DATA, but a hook is not guaranteed to
+    receive it. When it is absent the cross-delta state has nowhere to live, so
+    every delta reads back "outside a fence" and a mid-block delta — one that
+    carries fenced code but not the opening ``` — is bolded as prose, printing
+    literal ** inside the rendered block (a long report box is the visible worst
+    case). Fall back to the plugin's own per-user state directory, the one the
+    runtime overrides already use, so fence state survives across deltas whether
+    or not CLAUDE_PLUGIN_DATA is set.
+    """
+    return (os.environ.get("CLAUDE_PLUGIN_DATA")
+            or os.path.dirname(overrides.path()))
 
 
 def _fence_path(data_dir: str, message_id: str) -> str:
