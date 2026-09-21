@@ -229,6 +229,50 @@ class TestFenceState:
         bionify.sweep_stale_state("msg")  # must not raise
 
 
+class TestFenceStateWithoutPluginDataDir:
+    """When CLAUDE_PLUGIN_DATA is absent, fence state falls back to the plugin's
+    own per-user directory rather than vanishing, so a fenced block still spans
+    deltas instead of being bolded as prose. The autouse _isolate_state fixture
+    points that per-user store at tmp_path, so these run against an isolated dir.
+    """
+
+    def test_fence_dir_prefers_the_plugin_data_dir(self, monkeypatch, tmp_path):
+        monkeypatch.setenv("CLAUDE_PLUGIN_DATA", str(tmp_path / "pd"))
+        assert bionify._fence_dir() == str(tmp_path / "pd")
+
+    def test_fence_dir_falls_back_to_the_per_user_state_dir(self, monkeypatch):
+        monkeypatch.delenv("CLAUDE_PLUGIN_DATA", raising=False)
+        assert bionify._fence_dir() == os.path.dirname(overrides.path())
+
+    def test_state_persists_across_deltas_without_the_plugin_data_dir(self, monkeypatch):
+        monkeypatch.delenv("CLAUDE_PLUGIN_DATA", raising=False)
+        bionify.write_fence_state("msg", True)
+        assert bionify.read_fence_state("msg", index=1) is True
+
+    def test_interior_delta_is_not_bionified_without_the_plugin_data_dir(
+            self, monkeypatch, capsys):
+        """The regression: a fenced block whose interior arrives in a later delta,
+        one that carries no opening ```, must stay verbatim even with no data dir.
+        """
+        monkeypatch.delenv("CLAUDE_PLUGIN_DATA", raising=False)
+
+        def run(delta, index, final=False):
+            payload = json.dumps({"delta": delta, "message_id": "m",
+                                  "index": index, "final": final})
+            monkeypatch.setattr("sys.stdin", hook_stdin(payload))
+            bionify.main()
+            out = capsys.readouterr().out
+            return json.loads(out)["hookSpecificOutput"]["displayContent"] if out else delta
+
+        opening = run("Here is the report:\n```", 0)
+        interior = run("Total revenue collected today", 1)
+        closing = run("```\nDone.", 2, final=True)
+
+        assert opening == "**He**re is the **rep**ort:\n```"
+        assert interior == "Total revenue collected today"  # inside the fence, untouched
+        assert closing == "```\n**Do**ne."
+
+
 class TestConfig:
     OPTION_KEYS = ("FIXATION", "MIN_WORD_LENGTH", "BOUNDARY",
                    "SKIP_ACRONYMS", "PROTECT_URLS", "SKIP_HEADINGS")

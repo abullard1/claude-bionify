@@ -3,6 +3,18 @@
 All notable changes to claude-bionify are documented here. This project follows
 [semantic versioning](https://semver.org) and [Keep a Changelog](https://keepachangelog.com).
 
+## [1.0.7] - 2026-09-16
+
+### Fixed
+- Fenced code blocks that span more than one stream flush are no longer bolded as prose
+  when `CLAUDE_PLUGIN_DATA` is absent. The hook remembers whether a code fence is open in a
+  per-message file under that directory; when the variable was unset the state had nowhere
+  to live, so every flush restarted outside the fence and a middle-of-block flush — one that
+  carries fenced code but not the opening ``` — was bolded, printing literal `**` inside the
+  rendered block (a long report box was the worst case). The state now falls back to the
+  plugin's own per-user directory, the one the `/claude-bionify` overrides already use, so it
+  survives across flushes with or without `CLAUDE_PLUGIN_DATA`.
+
 ## [1.0.6] - 2026-08-17
 
 ### Fixed
