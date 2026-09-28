@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-d97757)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.0.7-success)
+![Version](https://img.shields.io/badge/version-1.1.0-success)
 [![CI](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml/badge.svg)](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/samuelbullard)
 
@@ -87,7 +87,9 @@ These write a small override file that the hook reads on every message, so chang
 
 claude-bionify also ships **seven color palettes** for Claude Code's `/theme` picker
 (`custom:claude-bionify:<name>`). They retint Claude Code's interface and are
-independent of the bolding.
+independent of the bolding. Each one also tints diffs, the background behind your
+messages, and mouse selection in its own colors, and every text-on-background pair
+meets WCAG AA contrast (4.5:1; 3:1 for the changed-word highlight inside a diff line).
 
 <div align="center">
   <img src="./assets/themes.svg" alt="The seven claude-bionify palettes" width="760">
@@ -101,8 +103,8 @@ independent of the bolding.
 | Nord | dark | `#D8DEE9` | `#88C0D0` | `#4C566A` | `#A3BE8C` | `#EBCB8B` | `#BF616A` |
 | Dracula | dark | `#F8F8F2` | `#BD93F9` | `#6272A4` | `#50FA7B` | `#F1FA8C` | `#FF5555` |
 | Gruvbox | dark | `#EBDBB2` | `#FABD2F` | `#928374` | `#B8BB26` | `#FE8019` | `#FB4934` |
-| Solarized Dark | dark | `#839496` | `#268BD2` | `#586E75` | `#859900` | `#CB4B16` | `#DC322F` |
-| Solarized Light | light | `#657B83` | `#268BD2` | `#93A1A1` | `#859900` | `#CB4B16` | `#DC322F` |
+| Solarized Dark | dark | `#93A1A1` | `#268BD2` | `#586E75` | `#859900` | `#CB4B16` | `#DC322F` |
+| Solarized Light | light | `#586E75` | `#268BD2` | `#93A1A1` | `#859900` | `#CB4B16` | `#DC322F` |
 | Sepia | light | `#5C3C24` | `#B58900` | `#8A7E72` | `#859900` | `#CB4B16` | `#DC322F` |
 | Focus Dark | dark | `#ABB2BF` | `#C678DD` | `#4B5263` | `#98C379` | `#D19A66` | `#E06C75` |
 

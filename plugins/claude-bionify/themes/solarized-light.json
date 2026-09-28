@@ -2,12 +2,21 @@
   "name": "Solarized Light",
   "base": "light",
   "overrides": {
-    "text": "#657B83",
+    "text": "#586E75",
     "claude": "#268BD2",
     "subtle": "#93A1A1",
     "promptBorder": "#EEE8D5",
     "error": "#DC322F",
     "success": "#859900",
-    "warning": "#CB4B16"
+    "warning": "#CB4B16",
+    "diffAdded": "#F1EDCC",
+    "diffRemoved": "#FBE8D6",
+    "diffAddedDimmed": "#F1EDCC",
+    "diffRemovedDimmed": "#FBE8D6",
+    "diffAddedWord": "#C7CC7D",
+    "diffRemovedWord": "#F2B3A6",
+    "userMessageBackground": "#F1EBD8",
+    "userMessageBackgroundHover": "#F1EBD8",
+    "selectionBg": "#F1EBD8"
   }
 }

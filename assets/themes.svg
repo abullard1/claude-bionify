@@ -33,7 +33,7 @@
           fill="#002B36" stroke="#073642" stroke-width="1"/>
     <g clip-path="url(#clip-solarized-dark)">
       <text x="22" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" letter-spacing="0.3" fill="#268BD2">Solarized Dark</text>
-      <rect x="22" y="56" width="34" height="16" rx="4" fill="#268BD2" stroke="#000" stroke-opacity="0.18"/><rect x="64" y="56" width="34" height="16" rx="4" fill="#839496" stroke="#000" stroke-opacity="0.18"/><rect x="106" y="56" width="34" height="16" rx="4" fill="#859900" stroke="#000" stroke-opacity="0.18"/><rect x="148" y="56" width="34" height="16" rx="4" fill="#CB4B16" stroke="#000" stroke-opacity="0.18"/><rect x="190" y="56" width="34" height="16" rx="4" fill="#DC322F" stroke="#000" stroke-opacity="0.18"/><rect x="232" y="56" width="34" height="16" rx="4" fill="#586E75" stroke="#000" stroke-opacity="0.18"/>
+      <rect x="22" y="56" width="34" height="16" rx="4" fill="#268BD2" stroke="#000" stroke-opacity="0.18"/><rect x="64" y="56" width="34" height="16" rx="4" fill="#93A1A1" stroke="#000" stroke-opacity="0.18"/><rect x="106" y="56" width="34" height="16" rx="4" fill="#859900" stroke="#000" stroke-opacity="0.18"/><rect x="148" y="56" width="34" height="16" rx="4" fill="#CB4B16" stroke="#000" stroke-opacity="0.18"/><rect x="190" y="56" width="34" height="16" rx="4" fill="#DC322F" stroke="#000" stroke-opacity="0.18"/><rect x="232" y="56" width="34" height="16" rx="4" fill="#586E75" stroke="#000" stroke-opacity="0.18"/>
     </g>
   </g>
   <g transform="translate(0,208)">
@@ -42,7 +42,7 @@
           fill="#FDF6E3" stroke="#EEE8D5" stroke-width="1"/>
     <g clip-path="url(#clip-solarized-light)">
       <text x="22" y="36" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="700" letter-spacing="0.3" fill="#268BD2">Solarized Light</text>
-      <rect x="22" y="56" width="34" height="16" rx="4" fill="#268BD2" stroke="#000" stroke-opacity="0.18"/><rect x="64" y="56" width="34" height="16" rx="4" fill="#657B83" stroke="#000" stroke-opacity="0.18"/><rect x="106" y="56" width="34" height="16" rx="4" fill="#859900" stroke="#000" stroke-opacity="0.18"/><rect x="148" y="56" width="34" height="16" rx="4" fill="#CB4B16" stroke="#000" stroke-opacity="0.18"/><rect x="190" y="56" width="34" height="16" rx="4" fill="#DC322F" stroke="#000" stroke-opacity="0.18"/><rect x="232" y="56" width="34" height="16" rx="4" fill="#93A1A1" stroke="#000" stroke-opacity="0.18"/>
+      <rect x="22" y="56" width="34" height="16" rx="4" fill="#268BD2" stroke="#000" stroke-opacity="0.18"/><rect x="64" y="56" width="34" height="16" rx="4" fill="#586E75" stroke="#000" stroke-opacity="0.18"/><rect x="106" y="56" width="34" height="16" rx="4" fill="#859900" stroke="#000" stroke-opacity="0.18"/><rect x="148" y="56" width="34" height="16" rx="4" fill="#CB4B16" stroke="#000" stroke-opacity="0.18"/><rect x="190" y="56" width="34" height="16" rx="4" fill="#DC322F" stroke="#000" stroke-opacity="0.18"/><rect x="232" y="56" width="34" height="16" rx="4" fill="#93A1A1" stroke="#000" stroke-opacity="0.18"/>
     </g>
   </g>
   <g transform="translate(408,208)">
