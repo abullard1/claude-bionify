@@ -3,6 +3,26 @@
 All notable changes to claude-bionify are documented here. This project follows
 [semantic versioning](https://semver.org) and [Keep a Changelog](https://keepachangelog.com).
 
+## [1.1.0] - 2026-09-29
+
+### Added
+- Every theme now colors diffs, the background behind your messages (and its hover), and
+  mouse selection in its own palette. These fell back to Claude Code's neutral presets, so
+  every dark theme showed the same saturated red and green diff blocks and a gray message
+  background that clashed with tinted palettes like Nord and Sepia. Diff tints blend each
+  theme's own success and error colors into its background; selection uses each palette's
+  upstream selection color. Diff colors need Claude Code 2.1.246 or later, which is when
+  custom themes started applying them.
+- A theme test that fails on any color Claude Code could not parse (it silently ignores
+  those) and on any text-on-background pair below WCAG AA: 4.5:1, or 3:1 for the
+  changed-word highlight inside a diff line.
+
+### Changed
+- Solarized Dark and Solarized Light use Solarized's emphasized text shade (`#93A1A1` and
+  `#586E75`, were `#839496` and `#657B83`). The standard shades are below 4.5:1 on
+  Solarized's own backgrounds, so no tint could keep text readable on top of them. In
+  Solarized Light the tints stay faint for the same reason.
+
 ## [1.0.7] - 2026-09-16
 
 ### Fixed

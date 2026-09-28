@@ -8,6 +8,15 @@
     "promptBorder": "#3C3836",
     "error": "#FB4934",
     "success": "#B8BB26",
-    "warning": "#FE8019"
+    "warning": "#FE8019",
+    "diffAdded": "#484828",
+    "diffRemoved": "#562F2B",
+    "diffAddedDimmed": "#363728",
+    "diffRemovedDimmed": "#3D2B29",
+    "diffAddedWord": "#696A27",
+    "diffRemovedWord": "#87372D",
+    "userMessageBackground": "#3C3836",
+    "userMessageBackgroundHover": "#46423D",
+    "selectionBg": "#504945"
   }
 }

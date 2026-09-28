@@ -2,12 +2,21 @@
   "name": "Solarized Dark",
   "base": "dark",
   "overrides": {
-    "text": "#839496",
+    "text": "#93A1A1",
     "claude": "#268BD2",
     "subtle": "#586E75",
     "promptBorder": "#073642",
     "error": "#DC322F",
     "success": "#859900",
-    "warning": "#CB4B16"
+    "warning": "#CB4B16",
+    "diffAdded": "#153D2D",
+    "diffRemoved": "#302D34",
+    "diffAddedDimmed": "#0D3631",
+    "diffRemovedDimmed": "#162C35",
+    "diffAddedWord": "#38591F",
+    "diffRemovedWord": "#632E33",
+    "userMessageBackground": "#073642",
+    "userMessageBackgroundHover": "#0E3B47",
+    "selectionBg": "#183B3D"
   }
 }
