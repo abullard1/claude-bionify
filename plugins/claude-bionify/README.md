@@ -10,7 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-d97757)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.1.0-success)
+![Version](https://img.shields.io/badge/version-1.2.0-success)
 
 </div>
 
@@ -27,10 +27,10 @@ information ([Rayner, 1979](https://doi.org/10.1068/p080021);
 
 ```shell
 /plugin marketplace add abullard1/claude-bionify
-/plugin install claude-bionify@claude-bionify
+/plugin install bionify@claude-bionify
 ```
 
-claude-bionify is active right away. Turn it off or on with `/claude-bionify:off` / `/claude-bionify:on`.
+claude-bionify is active right away. Turn it off or on with `/bionify:off` / `/bionify:on`.
 
 ## Configure
 
@@ -49,9 +49,9 @@ When you enable the plugin, Claude Code prompts for these (all optional):
 
 Change claude-bionify mid-session without a reload. The next reply reflects it instantly:
 
-- `/claude-bionify:toggle` · `/claude-bionify:on` · `/claude-bionify:off`
-- `/claude-bionify:set strength 0.7` · `/claude-bionify:set boundary syllable` · `/claude-bionify:set minlen 5` · `/claude-bionify:set acronyms off` · `/claude-bionify:set urls off` · `/claude-bionify:set headings off`
-- `/claude-bionify:status` · `/claude-bionify:reset`
+- `/bionify:toggle` · `/bionify:on` · `/bionify:off`
+- `/bionify:set strength 0.7` · `/bionify:set boundary syllable` · `/bionify:set minlen 5` · `/bionify:set acronyms off` · `/bionify:set urls off` · `/bionify:set headings off`
+- `/bionify:status` · `/bionify:reset`
 
 ## Themes
 

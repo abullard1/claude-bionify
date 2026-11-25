@@ -34,7 +34,7 @@ claude plugin validate ./plugins/claude-bionify --strict            # manifest
 - `plugins/claude-bionify/scripts/` holds the plugin code:
   - `settings.py` is the single source of truth for every option.
   - `core.py` is the pure formatting logic (no I/O).
-  - `bionify.py` is the MessageDisplay hook, `control.py` is the `/claude-bionify:set` CLI, and `overrides.py` is the shared override store.
+  - `bionify.py` is the MessageDisplay hook, `control.py` is the `/bionify:set` CLI, and `overrides.py` is the shared override store.
 - `tests/test_bionify.py` covers all of the above.
 - `assets/` holds the README images and `generate_themes.py`.
 

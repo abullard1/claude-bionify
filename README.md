@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-d97757)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.1.0-success)
+![Version](https://img.shields.io/badge/version-1.2.0-success)
 [![CI](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml/badge.svg)](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/samuelbullard)
 
@@ -48,11 +48,11 @@ transcript view.
 
 ```shell
 /plugin marketplace add abullard1/claude-bionify
-/plugin install claude-bionify@claude-bionify
+/plugin install bionify@claude-bionify
 ```
 
-claude-bionify is active right away. Turn it off or back on any time with `/claude-bionify:off` and
-`/claude-bionify:on`, or from `/plugin`.
+claude-bionify is active right away. Turn it off or back on any time with `/bionify:off` and
+`/bionify:on`, or from `/plugin`.
 
 ## Configure
 
@@ -73,20 +73,20 @@ Change claude-bionify mid-session without a reload or any config editing. The ne
 
 | Command | Does |
 | :------ | :--- |
-| `/claude-bionify:toggle` | Flip claude-bionify on/off |
-| `/claude-bionify:on` · `/claude-bionify:off` | Turn it on or off explicitly |
-| `/claude-bionify:set strength 0.7` | Set fixation strength (`0.1`–`0.9`) |
-| `/claude-bionify:set boundary syllable` | Switch boundary (`fraction` · `syllable` · `log`) |
-| `/claude-bionify:set minlen 5` · `/claude-bionify:set acronyms off` · `/claude-bionify:set urls off` · `/claude-bionify:set headings off` | Tweak the other settings |
-| `/claude-bionify:status` | Show the active overrides |
-| `/claude-bionify:reset` | Clear overrides, back to your configured defaults |
+| `/bionify:toggle` | Flip claude-bionify on/off |
+| `/bionify:on` · `/bionify:off` | Turn it on or off explicitly |
+| `/bionify:set strength 0.7` | Set fixation strength (`0.1`–`0.9`) |
+| `/bionify:set boundary syllable` | Switch boundary (`fraction` · `syllable` · `log`) |
+| `/bionify:set minlen 5` · `/bionify:set acronyms off` · `/bionify:set urls off` · `/bionify:set headings off` | Tweak the other settings |
+| `/bionify:status` | Show the active overrides |
+| `/bionify:reset` | Clear overrides, back to your configured defaults |
 
 These write a small override file that the hook reads on every message, so changes take effect immediately and persist until you `reset`.
 
 ## Themes
 
 claude-bionify also ships **seven color palettes** for Claude Code's `/theme` picker
-(`custom:claude-bionify:<name>`). They retint Claude Code's interface and are
+(`custom:bionify:<name>`). They retint Claude Code's interface and are
 independent of the bolding. Each one also tints diffs, the background behind your
 messages, and mouse selection in its own colors, and every text-on-background pair
 meets WCAG AA contrast (4.5:1; 3:1 for the changed-word highlight inside a diff line).
@@ -141,14 +141,14 @@ python.org installer creates `python.exe` and `py.exe` but no `python3.exe`, and
 a Microsoft Store placeholder named `python3.exe` that exits without running Python. The hook
 therefore also launches through the `py` launcher.
 
-Two consequences there. Bolding works, but the `/claude-bionify:*` commands do not, because
+Two consequences there. Bolding works, but the `/bionify:*` commands do not, because
 they run through a shell where no fallback syntax suits both Git Bash and PowerShell;
 installing Git for Windows, or a real `python3` on `PATH`, brings them back. And if your
 Python came from conda, uv, or pyenv-win, neither name may resolve, so point the hook at your
 interpreter with a `MessageDisplay` entry in `~/.claude/settings.json` whose `command` is the
 absolute path to your `python.exe`.
 
-If nothing looks bold but `/claude-bionify:status` reports ON, check the terminal before the
+If nothing looks bold but `/bionify:status` reports ON, check the terminal before the
 plugin: ask Claude to write a plain `**word**` in a reply. If that is not bold either, the hook
 is not the problem. Windows Terminal has a per-profile *Bold text style* setting
 (`intenseTextStyle` in its `settings.json`) which on `bright` only shifts the foreground colour,
@@ -195,14 +195,14 @@ claude-bionify/
 ├── plugins/claude-bionify/          # the plugin
 │   ├── .claude-plugin/plugin.json
 │   ├── hooks/hooks.json      # MessageDisplay -> bionify.py
-│   ├── commands/             # /claude-bionify:on, off, toggle, set, status, reset
+│   ├── commands/             # /bionify:on, off, toggle, set, status, reset
 │   ├── skills/               # model-invoked control/config skill
 │   ├── scripts/
 │   │   ├── core.py           # functional core: pure formatting + settings (no I/O)
 │   │   ├── overrides.py      # runtime-override persistence (shared contract)
 │   │   ├── interpreters.py   # whether the hook's interpreters can actually start
 │   │   ├── bionify.py        # the MessageDisplay hook shell (entrypoint)
-│   │   └── control.py        # the /claude-bionify control CLI
+│   │   └── control.py        # the /bionify control CLI
 │   ├── themes/               # 7 color themes for /theme (experimental component)
 │   └── README.md
 └── tests/test_bionify.py

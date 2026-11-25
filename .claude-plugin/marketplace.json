@@ -8,7 +8,7 @@
   "description": "A focused reading aid that brings bionic reading to Claude Code.",
   "plugins": [
     {
-      "name": "claude-bionify",
+      "name": "bionify",
       "source": "./plugins/claude-bionify",
       "displayName": "claude-bionify",
       "description": "Bionic reading for Claude's responses that bolds the leading part of each word to guide your eyes and enable you to read faster.",

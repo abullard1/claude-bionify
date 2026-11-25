@@ -1,6 +1,6 @@
 ---
-name: claude-bionify
-description: Configure and control the claude-bionify bionic reading plugin. Use when the user asks about bionic reading settings (fixation/strength, boundary, minimum word length, acronyms, URLs, headings), wants to turn the bionic display on, off, or toggle it, asks for the current status, or asks how to use the /claude-bionify commands.
+name: bionify
+description: Configure and control the claude-bionify bionic reading plugin. Use when the user asks about bionic reading settings (fixation/strength, boundary, minimum word length, acronyms, URLs, headings), wants to turn the bionic display on, off, or toggle it, asks for the current status, or asks how to use the /bionify commands.
 when_to_use: User says things like "make bionify bolder", "turn off bionic reading", "set fixation to 0.7", "how do I change the minimum word length", "what bionify commands are there", or "reset bionify to defaults".
 user-invocable: false
 ---
@@ -16,13 +16,13 @@ Use it to recommend the right command and the exact key a user needs.
 This skill is only useful when the **claude-bionify plugin** is installed. The skill and
 the plugin are separate: skill marketplaces can surface this `SKILL.md` on its own, so a
 user may have loaded the skill without the plugin that actually does the bolding. Without
-the plugin there is no `MessageDisplay` hook and no `/claude-bionify:*` commands, so every
+the plugin there is no `MessageDisplay` hook and no `/bionify:*` commands, so every
 instruction below is inert.
 
 Before advising on settings or commands, verify the plugin is present:
 
 ```bash
-grep -q 'claude-bionify' ~/.claude/plugins/installed_plugins.json 2>/dev/null \
+grep -q 'bionify@claude-bionify' ~/.claude/plugins/installed_plugins.json 2>/dev/null \
   && echo "plugin: installed" \
   || echo "plugin: MISSING"
 ```
@@ -33,7 +33,7 @@ and offer to run them:
 
 ```
 /plugin marketplace add abullard1/claude-bionify
-/plugin install claude-bionify@claude-bionify
+/plugin install bionify@claude-bionify
 ```
 
 These are slash commands the user runs in Claude Code; you cannot invoke them yourself, so
@@ -48,12 +48,12 @@ Load this skill when the user wants to:
 - Change a setting (boldness, boundary, word length, acronyms, URLs, headings).
 - Turn the formatting on, off, or toggle it.
 - Check the current state or reset overrides.
-- Learn what `/claude-bionify` commands exist.
+- Learn what `/bionify` commands exist.
 
 ## Settings
 
 Each setting has a default in `plugin.json` and a short key used by the live
-`/claude-bionify:set` command. The set key is what you pass to the command, and it is
+`/bionify:set` command. The set key is what you pass to the command, and it is
 shorter than the `plugin.json` field name.
 
 | Setting | `set` key | Default | Values | Meaning |
@@ -67,23 +67,23 @@ shorter than the `plugin.json` field name.
 
 ## Commands
 
-All commands live under the `/claude-bionify` namespace.
+All commands live under the `/bionify` namespace.
 
 | Command | Argument | Action |
 | :-- | :-- | :-- |
-| `/claude-bionify:status` | none | Show the current settings and whether bionify is on. |
-| `/claude-bionify:on` | none | Enable bionic formatting. |
-| `/claude-bionify:off` | none | Disable bionic formatting. |
-| `/claude-bionify:toggle` | none | Flip bionify on or off. |
-| `/claude-bionify:set` | `<key> <value>` | Override one setting live. Keys: `fixation` (or `strength`), `boundary`, `minlen`, `acronyms`, `urls`, `headings`. |
-| `/claude-bionify:reset` | none | Clear live overrides and restore the `plugin.json` defaults. |
+| `/bionify:status` | none | Show the current settings and whether bionify is on. |
+| `/bionify:on` | none | Enable bionic formatting. |
+| `/bionify:off` | none | Disable bionic formatting. |
+| `/bionify:toggle` | none | Flip bionify on or off. |
+| `/bionify:set` | `<key> <value>` | Override one setting live. Keys: `fixation` (or `strength`), `boundary`, `minlen`, `acronyms`, `urls`, `headings`. |
+| `/bionify:reset` | none | Clear live overrides and restore the `plugin.json` defaults. |
 
 Examples:
 
-- `/claude-bionify:set fixation 0.7`
-- `/claude-bionify:set boundary syllable`
-- `/claude-bionify:set minlen 5`
-- `/claude-bionify:set acronyms off`
+- `/bionify:set fixation 0.7`
+- `/bionify:set boundary syllable`
+- `/bionify:set minlen 5`
+- `/bionify:set acronyms off`
 
 Important: `set` only accepts the short keys above, not the longer `plugin.json` field
 names. `set minlen 5` works; `set min_word_length 5` does not. Likewise use `acronyms`,
@@ -91,6 +91,6 @@ names. `set minlen 5` works; `set min_word_length 5` does not. Likewise use `acr
 
 ## Notes
 
-- `set` changes apply to the next response and persist until `/claude-bionify:reset`.
+- `set` changes apply to the next response and persist until `/bionify:reset`.
 - Changing the `plugin.json` defaults instead takes effect on the next session.
 - The formatting is cosmetic: it never alters the underlying text Claude reads or saves.

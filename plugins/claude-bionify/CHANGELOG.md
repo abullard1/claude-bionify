@@ -3,6 +3,21 @@
 All notable changes to claude-bionify are documented here. This project follows
 [semantic versioning](https://semver.org) and [Keep a Changelog](https://keepachangelog.com).
 
+## [1.2.0] - 2026-11-25
+
+### Changed
+- Plugin id renamed `claude-bionify` → `bionify`. Claude Code 2.1.287+ reserves plugin
+  names starting with `claude-` for Anthropic's own plugins, so `claude plugin validate
+  --strict` failed on the old id (the runtime still installed and loaded it). Slash
+  commands are now `/bionify:on|off|toggle|set|status|reset` and the install id is
+  `bionify@claude-bionify`; the marketplace and repository names are unchanged, and plugin
+  themes now appear as `custom:bionify:<name>`. The runtime override file stays at
+  `~/.claude/claude-bionify/runtime.json`, so existing settings carry over.
+
+### Added
+- Plugin icon (`.claude-plugin/icon.png`, 512×512) for the marketplace listing, which the
+  validator warned was missing.
+
 ## [1.1.0] - 2026-09-29
 
 ### Added
