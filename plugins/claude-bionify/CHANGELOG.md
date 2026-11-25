@@ -3,6 +3,14 @@
 All notable changes to claude-bionify are documented here. This project follows
 [semantic versioning](https://semver.org) and [Keep a Changelog](https://keepachangelog.com).
 
+## [1.2.1] - 2026-11-25
+
+### Changed
+- The `boundary` userConfig option now declares `options: ["fraction", "syllable", "log"]`,
+  so on Claude Code 2.1.271+ the `/plugin configure bionify@claude-bionify` dialog shows
+  **Bold boundary** as a picker instead of free text. Booleans were already toggles and
+  numbers validated inputs; there is no slider control for numbers.
+
 ## [1.2.0] - 2026-11-25
 
 ### Changed

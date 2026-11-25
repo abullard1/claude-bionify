@@ -92,5 +92,9 @@ names. `set minlen 5` works; `set min_word_length 5` does not. Likewise use `acr
 ## Notes
 
 - `set` changes apply to the next response and persist until `/bionify:reset`.
-- Changing the `plugin.json` defaults instead takes effect on the next session.
+- Changing the `plugin.json` defaults instead takes effect on the next session. To edit
+  those defaults through a UI, run `/plugin configure bionify@claude-bionify` (any time, not
+  just at install) — **Bold boundary** renders as a picker on Claude Code 2.1.271+, the
+  booleans as toggles. From the shell: `claude plugin configure bionify@claude-bionify`
+  (add `--values-stdin` to save piped values, 2.1.285+).
 - The formatting is cosmetic: it never alters the underlying text Claude reads or saves.

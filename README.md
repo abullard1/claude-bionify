@@ -12,7 +12,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 ![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-d97757)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Version](https://img.shields.io/badge/version-1.2.0-success)
+![Version](https://img.shields.io/badge/version-1.2.1-success)
 [![CI](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml/badge.svg)](https://github.com/abullard1/claude-bionify/actions/workflows/ci.yml)
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy_Me_a_Coffee-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/samuelbullard)
 
@@ -56,7 +56,11 @@ claude-bionify is active right away. Turn it off or back on any time with `/bion
 
 ## Configure
 
-When you enable the plugin, Claude Code prompts for these (all optional):
+When you enable the plugin, Claude Code prompts for these (all optional). You can reopen
+that dialog any time with `/plugin configure bionify@claude-bionify` (in VS Code, the gear
+icon on the plugin's row) — **Bold boundary** is a picker, the booleans are toggles, and the
+numbers are validated inputs. From the shell, `claude plugin configure bionify@claude-bionify`
+lists the options and `--values-stdin` saves values piped in (Claude Code 2.1.285+).
 
 | Setting | Default | Meaning |
 | :------ | :------ | :------ |
